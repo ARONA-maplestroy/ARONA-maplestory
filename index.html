@@ -1050,6 +1050,29 @@
             height: 16px;
             border-radius: 3px;
         }
+        
+        .union-preset-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .union-preset-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        .union-preset-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
 
         /* 内在能力样式 */
         .ability-preset-selector {
@@ -2623,6 +2646,15 @@
             }
             
             html += '</div>';
+            
+            // 當前使用的預設
+            const presetNo = data.use_preset_no || 1;
+            html += `
+                <div class="union-preset-info">
+                    <span class="union-preset-label">當前預設:</span>
+                    <span class="union-preset-badge">預設 ${presetNo}</span>
+                </div>
+            `;
             
             // 图例
             html += `
