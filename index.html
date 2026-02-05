@@ -537,7 +537,7 @@
         .equip-desc { font-size: 0.8em; color: #aaa; margin-top: 4px; }
         
         /* 裝備預設選擇器 */
-        .equip-preset-selector {
+        .equip-preset-selector, .fashion-preset-selector {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -546,6 +546,62 @@
             background: rgba(0,0,0,0.2);
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* 時裝網格 */
+        .fashion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .fashion-item {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .fashion-item:hover {
+            border-color: rgba(255,105,180,0.5);
+            transform: translateY(-2px);
+        }
+        .fashion-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .fashion-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 5px;
+        }
+        .fashion-info { flex: 1; }
+        .fashion-name {
+            font-weight: bold;
+            color: #ff69b4;
+            margin-bottom: 4px;
+        }
+        .fashion-slot {
+            font-size: 0.85em;
+            color: #888;
+        }
+        .fashion-label {
+            display: inline-block;
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+        .fashion-label.date-label {
+            background: rgba(255,193,7,0.2);
+            color: #ffc107;
+        }
+        .no-fashion {
+            text-align: center;
+            padding: 40px;
+            color: #888;
         }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
@@ -1335,6 +1391,7 @@
                     <button class="tab-btn" onclick="switchTab('symbol')">🔮 符文</button>
                     <button class="tab-btn" onclick="switchTab('skill')">✨ 技能</button>
                     <button class="tab-btn" onclick="switchTab('union')">🏰 聯盟</button>
+                    <button class="tab-btn" onclick="switchTab('fashion')">👗 時裝</button>
                 </div>
 
                 <!-- 属性页 -->
@@ -1562,6 +1619,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- 時裝页 -->
+        <div class="tab-content" id="tab-fashion">
+            <!-- 時裝預設選擇器 -->
+            <div class="fashion-preset-selector">
+                <span class="preset-label">時裝預設:</span>
+                <button class="preset-btn active" onclick="changeFashionPreset(1)">預設 1</button>
+                <button class="preset-btn" onclick="changeFashionPreset(2)">預設 2</button>
+                <button class="preset-btn" onclick="changeFashionPreset(3)">預設 3</button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-section" style="grid-column: 1/-1;">
+                    <h3>👗 時裝裝備</h3>
+                    <div class="fashion-grid" id="fashionGrid" data-loaded="false">
+                        <div class="no-fashion">載入中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
         </div>
@@ -2092,6 +2169,7 @@
             else if (tabName === 'symbol') buttons[2].classList.add('active');
             else if (tabName === 'skill') buttons[3].classList.add('active');
             else if (tabName === 'union') buttons[4].classList.add('active');
+            else if (tabName === 'fashion') buttons[5].classList.add('active');
             
             // 切换内容
             document.getElementById('tab-' + tabName).classList.add('active');
@@ -2112,6 +2190,10 @@
             if (tabName === 'union' && currentOcid) {
                 console.log('🏰 Loading union...');
                 loadUnion(currentOcid);
+            }
+            if (tabName === 'fashion' && currentOcid) {
+                console.log('👗 Loading fashion...');
+                loadFashion(currentOcid);
             }
         }
         
@@ -2429,6 +2511,109 @@
             container.innerHTML = html;
         }
 
+        // 時裝資料缓存
+        let cachedFashionData = null;
+        let currentFashionPreset = 1;
+        
+        // 載入時裝
+        async function loadFashion(ocid) {
+            if (document.getElementById('fashionGrid').dataset.loaded === 'true') return;
+            try {
+                const result = await apiRequest('/character/cashitem-equipment', { ocid });
+                cachedFashionData = result;
+                console.log('👗 Fashion data:', result);
+                displayFashionByPreset(result, currentFashionPreset);
+                document.getElementById('fashionGrid').dataset.loaded = 'true';
+            } catch (e) {
+                console.error('Load fashion error:', e);
+                document.getElementById('fashionGrid').innerHTML = '<div class="no-fashion">載入失敗</div>';
+            }
+        }
+        
+        // 切換時裝預設
+        function changeFashionPreset(presetNo) {
+            currentFashionPreset = presetNo;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.fashion-preset-selector .preset-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === presetNo - 1);
+            });
+            
+            // 重新顯示時裝
+            if (cachedFashionData) {
+                displayFashionByPreset(cachedFashionData, presetNo);
+            }
+        }
+        
+        // 根据預設顯示時裝
+        function displayFashionByPreset(data, presetNo) {
+            const grid = document.getElementById('fashionGrid');
+            
+            // 選擇對應預設的時裝資料
+            let fashionItems;
+            if (presetNo === 1) {
+                fashionItems = data.cash_item_equipment_preset_1 || data.cash_item_equipment_base || [];
+            } else if (presetNo === 2) {
+                fashionItems = data.cash_item_equipment_preset_2 || [];
+            } else if (presetNo === 3) {
+                fashionItems = data.cash_item_equipment_preset_3 || [];
+            } else {
+                fashionItems = data.cash_item_equipment_base || [];
+            }
+            
+            console.log('👗 Fashion preset', presetNo, ':', fashionItems?.length, 'items');
+            
+            if (!fashionItems || fashionItems.length === 0) {
+                grid.innerHTML = '<div class="no-fashion">該預設暫無時裝資料</div>';
+                return;
+            }
+            
+            // 時裝部位排序
+            const slotOrder = ['帽子', '髮型', '臉型', '臉飾', '眼飾', '耳環', '上衣', '披風', '褲/裙', '手套', '鞋子', '武器', '戒指', '墜飾'];
+            fashionItems.sort((a, b) => {
+                const aIdx = slotOrder.findIndex(s => a.cash_item_equipment_part?.includes(s));
+                const bIdx = slotOrder.findIndex(s => b.cash_item_equipment_part?.includes(s));
+                return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+            });
+            
+            grid.innerHTML = fashionItems.map(item => {
+                // 計算到期時間
+                let expiryInfo = '';
+                if (item.cash_item_date_expire) {
+                    const expireDate = new Date(item.cash_item_date_expire);
+                    const now = new Date();
+                    const daysLeft = Math.ceil((expireDate - now) / (1000 * 60 * 60 * 24));
+                    if (daysLeft > 0) {
+                        expiryInfo = `<span class="fashion-label date-label">剩餘 ${daysLeft} 天</span>`;
+                    } else if (daysLeft === 0) {
+                        expiryInfo = `<span class="fashion-label date-label" style="background:rgba(220,53,69,0.2);color:#dc3545;">今日到期</span>`;
+                    }
+                }
+                
+                // 時裝選項（染色等）
+                let optionInfo = '';
+                if (item.cash_item_coloring_prism) {
+                    const prism = item.cash_item_coloring_prism;
+                    if (prism.color_range) {
+                        optionInfo += `<div class="fashion-option" style="font-size:0.8em;color:#aaa;margin-top:5px;">🎨 染色: ${prism.color_range} / ${prism.hue || 0} / ${prism.saturation || 0} / ${prism.value || 0}</div>`;
+                    }
+                }
+                
+                return `
+                <div class="fashion-item">
+                    <div class="fashion-header">
+                        <img class="fashion-icon" src="${item.cash_item_icon || ''}" alt="" onerror="this.style.display='none'">
+                        <div class="fashion-info">
+                            <div class="fashion-name">${item.cash_item_name || '未知'}</div>
+                            <div class="fashion-slot">${item.cash_item_equipment_part || item.cash_item_equipment_slot || ''}</div>
+                            ${expiryInfo}
+                        </div>
+                    </div>
+                    ${optionInfo}
+                </div>
+            `}).join('');
+        }
+        
         // 載入裝備
         async function loadEquipment(ocid) {
             if (document.getElementById('equipGrid').dataset.loaded === 'true') return;
