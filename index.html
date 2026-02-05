@@ -533,6 +533,18 @@
         
         .equip-item { min-height: 120px; }
         .equip-item.equip-special { border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.05); }
+        
+        /* 裝備預設選擇器 */
+        .equip-preset-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
@@ -1314,15 +1326,6 @@
                     </div>
                 </div>
 
-                <!-- 預設選擇 -->
-                <div class="preset-selector">
-                    <span class="preset-label">裝備預設:</span>
-                    <button class="preset-btn active" onclick="changePreset(1)">預設 1</button>
-                    <button class="preset-btn" onclick="changePreset(2)">預設 2</button>
-                    <button class="preset-btn" onclick="changePreset(3)">預設 3</button>
-                    <span class="preset-note">(仅切换裝備顯示)</span>
-                </div>
-
                 <!-- 選項卡 -->
                 <div class="tabs">
                     <button class="tab-btn active" onclick="switchTab('stats')">📊 属性</button>
@@ -1472,11 +1475,18 @@
 
         <!-- 裝備页 -->
         <div class="tab-content" id="tab-equip">
+            <!-- 裝備預設選擇器 -->
+            <div class="equip-preset-selector">
+                <span class="preset-label">裝備預設:</span>
+                <button class="preset-btn active" onclick="changePreset(1)">預設 1</button>
+                <button class="preset-btn" onclick="changePreset(2)">預設 2</button>
+                <button class="preset-btn" onclick="changePreset(3)">預設 3</button>
+            </div>
             <div class="stats-grid">
                 <div class="stat-section" style="grid-column: 1/-1;">
                     <h3>⚔️ 裝備詳情</h3>
                     <div class="equip-grid" id="equipGrid" data-loaded="false">
-                        <div class="no-equip">👆 点击"裝備"選項卡載入裝備資料</div>
+                        <div class="no-equip">載入中...</div>
                     </div>
                 </div>
             </div>
@@ -2511,45 +2521,49 @@
                 return `<div class="equip-pot-line ${potClass}">${value}</div>`;
             }
             
-            // 構建屬性詳情HTML（參考圖片設計）
+            // 構建屬性詳情HTML（總值 = 基礎 + 卷軸 + 星火 + 星力）
             function buildStatDetails(item) {
                 if (!item.item_total_option && !item.item_base_option) return '';
                 
                 const total = item.item_total_option || {};
                 const base = item.item_base_option || {};
-                const add = item.item_add_option || {};
-                const etc = item.item_etc_option || {};
-                const star = item.item_starforce_option || {};
+                const scroll = item.item_etc_option || {};  // 卷軸
+                const flame = item.item_add_option || {};   // 星火
+                const star = item.item_starforce_option || {}; // 星力
                 
                 let html = '<div class="equip-stat-details">';
                 
-                // 顯示各項屬性（總值 = 基礎 + 追加 + 星力）
+                // 顯示各項屬性（總值 = 基礎 + 卷軸 + 星火 + 星力）
                 const statNames = [
-                    { key: 'str', name: 'STR', color: '#ff6b6b' },
-                    { key: 'dex', name: 'DEX', color: '#56c5ff' },
-                    { key: 'int', name: 'INT', color: '#9b59b6' },
-                    { key: 'luk', name: 'LUK', color: '#43e97b' },
-                    { key: 'max_hp', name: '最大HP', color: '#f093fb' },
-                    { key: 'attack_power', name: '攻擊力', color: '#ffcc00' },
-                    { key: 'magic_power', name: '魔力', color: '#66ccff' },
-                    { key: 'boss_damage', name: 'BOSS傷害', color: '#ff9a56' },
-                    { key: 'ignore_monster_armor', name: '無視防禦', color: '#ff6b6b' },
-                    { key: 'all_stat', name: '全屬性', color: '#ffd700' }
+                    { key: 'str', name: 'STR' },
+                    { key: 'dex', name: 'DEX' },
+                    { key: 'int', name: 'INT' },
+                    { key: 'luk', name: 'LUK' },
+                    { key: 'max_hp', name: '最大HP' },
+                    { key: 'attack_power', name: '攻擊力' },
+                    { key: 'magic_power', name: '魔力' },
+                    { key: 'boss_damage', name: 'BOSS傷害' },
+                    { key: 'ignore_monster_armor', name: '無視防禦' },
+                    { key: 'all_stat', name: '全屬性' }
                 ];
                 
                 statNames.forEach(stat => {
                     const totalVal = parseInt(total[stat.key]) || 0;
                     const baseVal = parseInt(base[stat.key]) || 0;
-                    const addVal = parseInt(add[stat.key]) || 0;
+                    const scrollVal = parseInt(scroll[stat.key]) || 0;
+                    const flameVal = parseInt(flame[stat.key]) || 0;
                     const starVal = parseInt(star[stat.key]) || 0;
                     
                     if (totalVal > 0) {
-                        let detail = `${stat.name} : <span style="color:${stat.color}">+${totalVal}</span>`;
-                        if (baseVal > 0 || addVal > 0 || starVal > 0) {
-                            detail += ` <span style="color:#888;font-size:0.85em;">( ${baseVal}`;
-                            if (addVal > 0) detail += ` <span style="color:#ffcc00">+${addVal}</span>`;
-                            if (starVal > 0) detail += ` <span style="color:#ffd700">+${starVal}</span>`;
-                            detail += ` )</span>`;
+                        let detail = `${stat.name} : +${totalVal}`;
+                        const parts = [];
+                        if (baseVal > 0) parts.push(`<span style="color:#fff">${baseVal}</span>`);
+                        if (scrollVal > 0) parts.push(`<span style="color:#cc88ff">+${scrollVal}</span>`);
+                        if (flameVal > 0) parts.push(`<span style="color:#66ff66">+${flameVal}</span>`);
+                        if (starVal > 0) parts.push(`<span style="color:#ffdd00">+${starVal}</span>`);
+                        
+                        if (parts.length > 0) {
+                            detail += ` <span style="color:#888;font-size:0.85em;">( ${parts.join(' ')} )</span>`;
                         }
                         html += `<div class="equip-stat-row">${detail}</div>`;
                     }
