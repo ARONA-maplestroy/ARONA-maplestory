@@ -603,6 +603,14 @@
             padding: 40px;
             color: #888;
         }
+        .fashion-section {
+            margin-bottom: 20px;
+        }
+        .fashion-grid-inner {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
@@ -2550,33 +2558,30 @@
             const grid = document.getElementById('fashionGrid');
             
             // 選擇對應預設的時裝資料
-            let fashionItems;
+            let fashionItems = [];
+            let additionalItems = [];
+            let baseItems = data.cash_item_equipment_base || [];
+            let additionalBaseItems = data.additional_cash_item_equipment_base || [];
+            
             if (presetNo === 1) {
-                fashionItems = data.cash_item_equipment_preset_1 || data.cash_item_equipment_base || [];
+                fashionItems = data.cash_item_equipment_preset_1 || [];
+                additionalItems = data.additional_cash_item_equipment_preset_1 || [];
             } else if (presetNo === 2) {
                 fashionItems = data.cash_item_equipment_preset_2 || [];
+                additionalItems = data.additional_cash_item_equipment_preset_2 || [];
             } else if (presetNo === 3) {
                 fashionItems = data.cash_item_equipment_preset_3 || [];
-            } else {
-                fashionItems = data.cash_item_equipment_base || [];
+                additionalItems = data.additional_cash_item_equipment_preset_3 || [];
             }
             
-            console.log('👗 Fashion preset', presetNo, ':', fashionItems?.length, 'items');
+            console.log('👗 Fashion preset', presetNo);
+            console.log('👗 Base items:', baseItems?.length);
+            console.log('👗 Preset items:', fashionItems?.length);
+            console.log('👗 Additional base:', additionalBaseItems?.length);
+            console.log('👗 Additional preset:', additionalItems?.length);
             
-            if (!fashionItems || fashionItems.length === 0) {
-                grid.innerHTML = '<div class="no-fashion">該預設暫無時裝資料</div>';
-                return;
-            }
-            
-            // 時裝部位排序
-            const slotOrder = ['帽子', '髮型', '臉型', '臉飾', '眼飾', '耳環', '上衣', '披風', '褲/裙', '手套', '鞋子', '武器', '戒指', '墜飾'];
-            fashionItems.sort((a, b) => {
-                const aIdx = slotOrder.findIndex(s => a.cash_item_equipment_part?.includes(s));
-                const bIdx = slotOrder.findIndex(s => b.cash_item_equipment_part?.includes(s));
-                return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
-            });
-            
-            grid.innerHTML = fashionItems.map(item => {
+            // 渲染單個時裝項目
+            function renderFashionItem(item, category = '') {
                 // 計算到期時間
                 let expiryInfo = '';
                 if (item.cash_item_date_expire) {
@@ -2599,19 +2604,75 @@
                     }
                 }
                 
+                // 類別標籤
+                let categoryLabel = '';
+                if (category) {
+                    categoryLabel = `<span class="fashion-label" style="background:rgba(100,149,237,0.2);color:#6495ed;margin-left:5px;">${category}</span>`;
+                }
+                
                 return `
                 <div class="fashion-item">
                     <div class="fashion-header">
                         <img class="fashion-icon" src="${item.cash_item_icon || ''}" alt="" onerror="this.style.display='none'">
                         <div class="fashion-info">
                             <div class="fashion-name">${item.cash_item_name || '未知'}</div>
-                            <div class="fashion-slot">${item.cash_item_equipment_part || item.cash_item_equipment_slot || ''}</div>
+                            <div class="fashion-slot">${item.cash_item_equipment_part || item.cash_item_equipment_slot || ''}${categoryLabel}</div>
                             ${expiryInfo}
                         </div>
                     </div>
                     ${optionInfo}
                 </div>
-            `}).join('');
+            `;
+            }
+            
+            // 時裝部位排序
+            const slotOrder = ['帽子', '髮型', '臉型', '臉飾', '眼飾', '耳環', '上衣', '披風', '褲/裙', '手套', '鞋子', '武器', '戒指', '墜飾', '寵物'];
+            function sortBySlot(items) {
+                return [...items].sort((a, b) => {
+                    const aPart = a.cash_item_equipment_part || '';
+                    const bPart = b.cash_item_equipment_part || '';
+                    const aIdx = slotOrder.findIndex(s => aPart.includes(s));
+                    const bIdx = slotOrder.findIndex(s => bPart.includes(s));
+                    return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+                });
+            }
+            
+            let html = '';
+            
+            // 1. 角色身上的時裝（基礎）
+            if (baseItems && baseItems.length > 0) {
+                html += '<div class="fashion-section"><h4 style="color:#ff69b4;margin:15px 0 10px;">👤 角色時裝</h4><div class="fashion-grid-inner">';
+                html += sortBySlot(baseItems).map(item => renderFashionItem(item)).join('');
+                html += '</div></div>';
+            }
+            
+            // 2. 預設時裝（如果與基礎不同）
+            if (fashionItems && fashionItems.length > 0) {
+                html += `<div class="fashion-section"><h4 style="color:#ff69b4;margin:15px 0 10px;">📦 預設 ${presetNo} 時裝</h4><div class="fashion-grid-inner">`;
+                html += sortBySlot(fashionItems).map(item => renderFashionItem(item)).join('');
+                html += '</div></div>';
+            }
+            
+            // 3. 寵物裝備（基礎）
+            if (additionalBaseItems && additionalBaseItems.length > 0) {
+                html += '<div class="fashion-section"><h4 style="color:#87ceeb;margin:15px 0 10px;">🐾 寵物裝備</h4><div class="fashion-grid-inner">';
+                html += sortBySlot(additionalBaseItems).map(item => renderFashionItem(item)).join('');
+                html += '</div></div>';
+            }
+            
+            // 4. 寵物裝備預設
+            if (additionalItems && additionalItems.length > 0) {
+                html += `<div class="fashion-section"><h4 style="color:#87ceeb;margin:15px 0 10px;">🐾 寵物裝備預設 ${presetNo}</h4><div class="fashion-grid-inner">`;
+                html += sortBySlot(additionalItems).map(item => renderFashionItem(item)).join('');
+                html += '</div></div>';
+            }
+            
+            if (!html) {
+                grid.innerHTML = '<div class="no-fashion">暫無時裝資料</div>';
+                return;
+            }
+            
+            grid.innerHTML = html;
         }
         
         // 載入裝備
