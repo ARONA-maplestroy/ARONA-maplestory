@@ -460,6 +460,7 @@
         .equip-pot-line.epic { border-left-color: #f1c40f; background: rgba(241, 196, 15, 0.15); color: #ffcc00; }
         .equip-pot-line.rare { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.15); color: #cc88ff; }
         .equip-item { min-height: 120px; }
+        .equip-item.equip-special { border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.05); }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
@@ -2348,12 +2349,21 @@
         async function loadEquipment(ocid) {
             if (document.getElementById('equipGrid').dataset.loaded === 'true') return;
             try {
-                const result = await apiRequest('/character/item-equipment', { ocid });
-                cachedEquipmentData = result; // 缓存裝備資料
-                displayEquipmentByPreset(result, currentPreset);
+                // 並行載入一般裝備、Android、寵物裝備
+                const [equipResult, androidResult, petResult] = await Promise.all([
+                    apiRequest('/character/item-equipment', { ocid }),
+                    apiRequest('/character/android-equipment', { ocid }).catch(() => null),
+                    apiRequest('/character/pet-equipment', { ocid }).catch(() => null)
+                ]);
+                
+                cachedEquipmentData = equipResult;
+                cachedEquipmentData.android_info = androidResult;
+                cachedEquipmentData.pet_info = petResult;
+                
+                displayEquipmentByPreset(cachedEquipmentData, currentPreset);
                 document.getElementById('equipGrid').dataset.loaded = 'true';
             } catch (e) {
-                document.getElementById('equipGrid').innerHTML = '<div class="no-equip">載入失败</div>';
+                document.getElementById('equipGrid').innerHTML = '<div class="no-equip">載入失敗</div>';
             }
         }
 
@@ -2469,6 +2479,86 @@
                     </div>
                 </div>
             `}).join('');
+            
+            // 添加圖騰顯示
+            if (data.title) {
+                const title = data.title;
+                grid.innerHTML += `
+                    <div class="equip-item equip-special">
+                        <img class="equip-icon" src="${title.title_icon || ''}" alt="">
+                        <div class="equip-info">
+                            <div class="equip-slot">🏷️ 稱號</div>
+                            <div class="equip-name">${title.title_name || '未知'}</div>
+                            <div class="equip-stats">${title.title_description || ''}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 添加龍之寶玉顯示
+            if (data.dragon_equipment && data.dragon_equipment.length > 0) {
+                data.dragon_equipment.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="equip-item equip-special">
+                            <img class="equip-icon" src="${item.item_icon || ''}" alt="">
+                            <div class="equip-info">
+                                <div class="equip-slot">🐉 龍之寶玉</div>
+                                <div class="equip-name">${item.item_name || '未知'}</div>
+                                <div class="equip-stats">${item.item_description || ''}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // 添加機械心臟顯示
+            if (data.mechanic_equipment && data.mechanic_equipment.length > 0) {
+                data.mechanic_equipment.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="equip-item equip-special">
+                            <img class="equip-icon" src="${item.item_icon || ''}" alt="">
+                            <div class="equip-info">
+                                <div class="equip-slot">⚙️ 機械裝備</div>
+                                <div class="equip-name">${item.item_name || '未知'}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // 添加Android顯示
+            if (data.android_info && data.android_info.android_name) {
+                const android = data.android_info;
+                grid.innerHTML += `
+                    <div class="equip-item equip-special">
+                        <img class="equip-icon" src="${android.android_icon || ''}" alt="">
+                        <div class="equip-info">
+                            <div class="equip-slot">🤖 Android</div>
+                            <div class="equip-name">${android.android_name || '未知'}</div>
+                            <div class="equip-stats">${android.android_description || ''}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 添加寵物顯示
+            if (data.pet_info) {
+                const pets = [data.pet_info.pet_1_name, data.pet_info.pet_2_name, data.pet_info.pet_3_name];
+                const petIcons = [data.pet_info.pet_1_icon, data.pet_info.pet_2_icon, data.pet_info.pet_3_icon];
+                pets.forEach((petName, idx) => {
+                    if (petName) {
+                        grid.innerHTML += `
+                            <div class="equip-item equip-special">
+                                <img class="equip-icon" src="${petIcons[idx] || ''}" alt="">
+                                <div class="equip-info">
+                                    <div class="equip-slot">🐾 寵物 ${idx + 1}</div>
+                                    <div class="equip-name">${petName}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
         }
 
         // 載入符文
