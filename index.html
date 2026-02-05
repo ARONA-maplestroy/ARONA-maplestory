@@ -447,12 +447,13 @@
             text-overflow: ellipsis;
         }
         .equip-slot { font-size: 0.8em; color: #888; margin-bottom: 5px; }
-        .equip-stats { font-size: 0.85em; color: #aaa; }
-        .equip-pot { font-size: 0.8em; margin-top: 5px; }
+        .equip-stats { font-size: 0.85em; color: #aaa; margin-bottom: 8px; }
+        .equip-pot { font-size: 0.8em; line-height: 1.4; }
         .pot-legendary { color: #8aff8a; }
         .pot-unique { color: #ffcc00; }
         .pot-epic { color: #cc88ff; }
         .pot-rare { color: #66ccff; }
+        .equip-item { min-height: 120px; }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
@@ -2378,28 +2379,79 @@
                 return;
             }
             
-            grid.innerHTML = equipment.map(item => `
+            grid.innerHTML = equipment.map(item => {
+                // 構建潛能顯示
+                let potentialHtml = '';
+                if (item.potential_option_grade) {
+                    const potClass = getPotentialClass(item.potential_option_grade);
+                    potentialHtml += `<div class="equip-pot ${potClass}">【${getPotentialName(item.potential_option_grade)}潛能】</div>`;
+                    if (item.potential_option_1) potentialHtml += `<div class="equip-pot ${potClass}">　${item.potential_option_1}</div>`;
+                    if (item.potential_option_2) potentialHtml += `<div class="equip-pot ${potClass}">　${item.potential_option_2}</div>`;
+                    if (item.potential_option_3) potentialHtml += `<div class="equip-pot ${potClass}">　${item.potential_option_3}</div>`;
+                }
+                
+                // 構建附加潛能顯示
+                let addPotentialHtml = '';
+                if (item.additional_potential_option_grade) {
+                    const addPotClass = getPotentialClass(item.additional_potential_option_grade);
+                    addPotentialHtml += `<div class="equip-pot ${addPotClass}">【${getPotentialName(item.additional_potential_option_grade)}附加】</div>`;
+                    if (item.additional_potential_option_1) addPotentialHtml += `<div class="equip-pot ${addPotClass}">　${item.additional_potential_option_1}</div>`;
+                    if (item.additional_potential_option_2) addPotentialHtml += `<div class="equip-pot ${addPotClass}">　${item.additional_potential_option_2}</div>`;
+                    if (item.additional_potential_option_3) addPotentialHtml += `<div class="equip-pot ${addPotClass}">　${item.additional_potential_option_3}</div>`;
+                }
+                
+                return `
                 <div class="equip-item">
                     <img class="equip-icon" src="${item.item_icon || ''}" alt="">
                     <div class="equip-info">
                         <div class="equip-slot">${item.item_equipment_part || item.item_equipment_slot || ''}</div>
                         <div class="equip-name">${item.item_name || '未知'}</div>
                         ${item.starforce ? `<div class="star-force">⭐ ${item.starforce}星</div>` : ''}
-                        ${item.potential_option_grade ? `<div class="equip-pot pot-${item.potential_option_grade.toLowerCase()}">${item.potential_option_grade}潛: ${item.potential_option_1 || '-'}</div>` : ''}
-                        ${item.additional_potential_option_grade ? `<div class="equip-pot pot-${item.additional_potential_option_grade.toLowerCase()}">附加${item.additional_potential_option_grade}: ${item.additional_potential_option_1 || '-'}</div>` : ''}
                         <div class="equip-stats">
                             ${item.item_total_option ? `
-                                ${item.item_total_option.str ? 'STR+' + item.item_total_option.str : ''}
-                                ${item.item_total_option.dex ? 'DEX+' + item.item_total_option.dex : ''}
-                                ${item.item_total_option.int ? 'INT+' + item.item_total_option.int : ''}
-                                ${item.item_total_option.luk ? 'LUK+' + item.item_total_option.luk : ''}
-                                ${item.item_total_option.attack_power ? '攻+' + item.item_total_option.attack_power : ''}
+                                ${item.item_total_option.str ? 'STR+' + item.item_total_option.str + ' ' : ''}
+                                ${item.item_total_option.dex ? 'DEX+' + item.item_total_option.dex + ' ' : ''}
+                                ${item.item_total_option.int ? 'INT+' + item.item_total_option.int + ' ' : ''}
+                                ${item.item_total_option.luk ? 'LUK+' + item.item_total_option.luk + ' ' : ''}
+                                ${item.item_total_option.attack_power ? '攻+' + item.item_total_option.attack_power + ' ' : ''}
                                 ${item.item_total_option.magic_power ? '魔+' + item.item_total_option.magic_power : ''}
                             ` : ''}
                         </div>
+                        ${potentialHtml}
+                        ${addPotentialHtml}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
+            
+            // 潛能等級對應的CSS類
+            function getPotentialClass(grade) {
+                const gradeMap = {
+                    '傳說': 'pot-legendary',
+                    'LEGENDARY': 'pot-legendary',
+                    '特殊': 'pot-unique',
+                    'UNIQUE': 'pot-unique',
+                    '罕見': 'pot-epic',
+                    'EPIC': 'pot-epic',
+                    '稀有': 'pot-rare',
+                    'RARE': 'pot-rare'
+                };
+                return gradeMap[grade] || '';
+            }
+            
+            // 潛能等級名稱
+            function getPotentialName(grade) {
+                const nameMap = {
+                    '傳說': '傳說',
+                    'LEGENDARY': '傳說',
+                    '特殊': '特殊',
+                    'UNIQUE': '特殊',
+                    '罕見': '罕見',
+                    'EPIC': '罕見',
+                    '稀有': '稀有',
+                    'RARE': '稀有'
+                };
+                return nameMap[grade] || grade;
+            }
         }
 
         // 載入符文
