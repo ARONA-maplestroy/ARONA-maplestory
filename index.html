@@ -415,7 +415,7 @@
         /* 裝備列表 */
         .equip-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 15px;
         }
         .equip-item {
@@ -448,17 +448,89 @@
         }
         .equip-slot { font-size: 0.8em; color: #888; margin-bottom: 5px; }
         .equip-stats { font-size: 0.85em; color: #aaa; margin-bottom: 8px; }
+        
+        /* 新裝備卡片設計 */
+        .equip-item-new {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .equip-item-new:hover {
+            border-color: rgba(255,154,86,0.5);
+            transform: translateY(-2px);
+        }
+        .equip-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .equip-icon-large {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 5px;
+            flex-shrink: 0;
+        }
+        .equip-title { flex: 1; }
+        .equip-name-new {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .equip-slot-new {
+            font-size: 0.85em;
+            color: #888;
+        }
+        .equip-starforce {
+            color: #ffd700;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        .equip-grades {
+            margin-bottom: 10px;
+        }
+        .grade-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            margin: 3px 0;
+        }
+        .grade-label {
+            color: #888;
+            min-width: 35px;
+        }
+        .equip-stat-details {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .equip-stat-row {
+            font-size: 0.85em;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .equip-stat-row:last-child { border-bottom: none; }
+        
         .equip-pot-section { margin-top: 8px; }
         .equip-pot-title { font-size: 0.8em; font-weight: bold; margin-bottom: 4px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
         .equip-pot-title.legendary { background: #2ecc71; color: #fff; }
         .equip-pot-title.unique { background: #3498db; color: #fff; }
         .equip-pot-title.epic { background: #f1c40f; color: #333; }
         .equip-pot-title.rare { background: #9b59b6; color: #fff; }
-        .equip-pot-line { font-size: 0.8em; padding: 4px 8px; margin: 2px 0; border-radius: 4px; border-left: 3px solid #666; background: rgba(0,0,0,0.2); }
+        .equip-pot-line { font-size: 0.85em; padding: 4px 8px; margin: 2px 0; border-radius: 4px; border-left: 3px solid #666; background: rgba(0,0,0,0.2); }
         .equip-pot-line.legendary { border-left-color: #2ecc71; background: rgba(46, 204, 113, 0.15); color: #8aff8a; }
         .equip-pot-line.unique { border-left-color: #3498db; background: rgba(52, 152, 219, 0.15); color: #66ccff; }
         .equip-pot-line.epic { border-left-color: #f1c40f; background: rgba(241, 196, 15, 0.15); color: #ffcc00; }
         .equip-pot-line.rare { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.15); color: #cc88ff; }
+        
         .equip-item { min-height: 120px; }
         .equip-item.equip-special { border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.05); }
         .star-force { color: #ffdd44; font-size: 0.85em; }
@@ -2349,20 +2421,27 @@
         async function loadEquipment(ocid) {
             if (document.getElementById('equipGrid').dataset.loaded === 'true') return;
             try {
-                // 並行載入一般裝備、Android、寵物裝備
-                const [equipResult, androidResult, petResult] = await Promise.all([
+                // 並行載入所有裝備相關API
+                const [equipResult, androidResult, petResult, cashResult, setEffectResult] = await Promise.all([
                     apiRequest('/character/item-equipment', { ocid }),
                     apiRequest('/character/android-equipment', { ocid }).catch(() => null),
-                    apiRequest('/character/pet-equipment', { ocid }).catch(() => null)
+                    apiRequest('/character/pet-equipment', { ocid }).catch(() => null),
+                    apiRequest('/character/cashitem-equipment', { ocid }).catch(() => null),
+                    apiRequest('/character/set-effect', { ocid }).catch(() => null)
                 ]);
                 
                 cachedEquipmentData = equipResult;
                 cachedEquipmentData.android_info = androidResult;
                 cachedEquipmentData.pet_info = petResult;
+                cachedEquipmentData.cash_info = cashResult;
+                cachedEquipmentData.set_effect_info = setEffectResult;
+                
+                console.log('📦 All equipment data:', cachedEquipmentData);
                 
                 displayEquipmentByPreset(cachedEquipmentData, currentPreset);
                 document.getElementById('equipGrid').dataset.loaded = 'true';
             } catch (e) {
+                console.error('Load equipment error:', e);
                 document.getElementById('equipGrid').innerHTML = '<div class="no-equip">載入失敗</div>';
             }
         }
@@ -2432,13 +2511,61 @@
                 return `<div class="equip-pot-line ${potClass}">${value}</div>`;
             }
             
+            // 構建屬性詳情HTML（參考圖片設計）
+            function buildStatDetails(item) {
+                if (!item.item_total_option && !item.item_base_option) return '';
+                
+                const total = item.item_total_option || {};
+                const base = item.item_base_option || {};
+                const add = item.item_add_option || {};
+                const etc = item.item_etc_option || {};
+                const star = item.item_starforce_option || {};
+                
+                let html = '<div class="equip-stat-details">';
+                
+                // 顯示各項屬性（總值 = 基礎 + 追加 + 星力）
+                const statNames = [
+                    { key: 'str', name: 'STR', color: '#ff6b6b' },
+                    { key: 'dex', name: 'DEX', color: '#56c5ff' },
+                    { key: 'int', name: 'INT', color: '#9b59b6' },
+                    { key: 'luk', name: 'LUK', color: '#43e97b' },
+                    { key: 'max_hp', name: '最大HP', color: '#f093fb' },
+                    { key: 'attack_power', name: '攻擊力', color: '#ffcc00' },
+                    { key: 'magic_power', name: '魔力', color: '#66ccff' },
+                    { key: 'boss_damage', name: 'BOSS傷害', color: '#ff9a56' },
+                    { key: 'ignore_monster_armor', name: '無視防禦', color: '#ff6b6b' },
+                    { key: 'all_stat', name: '全屬性', color: '#ffd700' }
+                ];
+                
+                statNames.forEach(stat => {
+                    const totalVal = parseInt(total[stat.key]) || 0;
+                    const baseVal = parseInt(base[stat.key]) || 0;
+                    const addVal = parseInt(add[stat.key]) || 0;
+                    const starVal = parseInt(star[stat.key]) || 0;
+                    
+                    if (totalVal > 0) {
+                        let detail = `${stat.name} : <span style="color:${stat.color}">+${totalVal}</span>`;
+                        if (baseVal > 0 || addVal > 0 || starVal > 0) {
+                            detail += ` <span style="color:#888;font-size:0.85em;">( ${baseVal}`;
+                            if (addVal > 0) detail += ` <span style="color:#ffcc00">+${addVal}</span>`;
+                            if (starVal > 0) detail += ` <span style="color:#ffd700">+${starVal}</span>`;
+                            detail += ` )</span>`;
+                        }
+                        html += `<div class="equip-stat-row">${detail}</div>`;
+                    }
+                });
+                
+                html += '</div>';
+                return html;
+            }
+            
             grid.innerHTML = equipment.map(item => {
                 // 構建潛能顯示
                 let potentialHtml = '';
                 if (item.potential_option_grade) {
                     const mainClass = getPotentialClass(item.potential_option_grade);
                     potentialHtml += `<div class="equip-pot-section">`;
-                    potentialHtml += `<div class="equip-pot-title ${mainClass}">${getPotentialName(item.potential_option_grade)}潛能</div>`;
+                    potentialHtml += `<div class="equip-pot-title ${mainClass}">潛能屬性</div>`;
                     potentialHtml += buildPotentialLine(item.potential_option_1, item.potential_option_1_grade || item.potential_option_grade);
                     potentialHtml += buildPotentialLine(item.potential_option_2, item.potential_option_2_grade || item.potential_option_grade);
                     potentialHtml += buildPotentialLine(item.potential_option_3, item.potential_option_3_grade || item.potential_option_grade);
@@ -2450,35 +2577,59 @@
                 if (item.additional_potential_option_grade) {
                     const addMainClass = getPotentialClass(item.additional_potential_option_grade);
                     addPotentialHtml += `<div class="equip-pot-section">`;
-                    addPotentialHtml += `<div class="equip-pot-title ${addMainClass}">${getPotentialName(item.additional_potential_option_grade)}附加</div>`;
+                    addPotentialHtml += `<div class="equip-pot-title ${addMainClass}">附加潛能</div>`;
                     addPotentialHtml += buildPotentialLine(item.additional_potential_option_1, item.additional_potential_option_1_grade || item.additional_potential_option_grade);
                     addPotentialHtml += buildPotentialLine(item.additional_potential_option_2, item.additional_potential_option_2_grade || item.additional_potential_option_grade);
                     addPotentialHtml += buildPotentialLine(item.additional_potential_option_3, item.additional_potential_option_3_grade || item.additional_potential_option_grade);
                     addPotentialHtml += `</div>`;
                 }
                 
+                // 星力顯示
+                const starforceHtml = item.starforce ? `<div class="equip-starforce">⭐ ${item.starforce}星${item.starforce_scroll_flag === '사용' ? ' (卷軸)' : ''}</div>` : '';
+                
+                // 裝備等級星星顯示
+                const gradeStars = getGradeStars(item.potential_option_grade);
+                const addGradeStars = getGradeStars(item.additional_potential_option_grade);
+                
                 return `
-                <div class="equip-item">
-                    <img class="equip-icon" src="${item.item_icon || ''}" alt="">
-                    <div class="equip-info">
-                        <div class="equip-slot">${item.item_equipment_part || item.item_equipment_slot || ''}</div>
-                        <div class="equip-name">${item.item_name || '未知'}</div>
-                        ${item.starforce ? `<div class="star-force">⭐ ${item.starforce}星</div>` : ''}
-                        <div class="equip-stats">
-                            ${item.item_total_option ? `
-                                ${item.item_total_option.str ? 'STR+' + item.item_total_option.str + ' ' : ''}
-                                ${item.item_total_option.dex ? 'DEX+' + item.item_total_option.dex + ' ' : ''}
-                                ${item.item_total_option.int ? 'INT+' + item.item_total_option.int + ' ' : ''}
-                                ${item.item_total_option.luk ? 'LUK+' + item.item_total_option.luk + ' ' : ''}
-                                ${item.item_total_option.attack_power ? '攻+' + item.item_total_option.attack_power + ' ' : ''}
-                                ${item.item_total_option.magic_power ? '魔+' + item.item_total_option.magic_power : ''}
-                            ` : ''}
+                <div class="equip-item-new">
+                    <div class="equip-header">
+                        <img class="equip-icon-large" src="${item.item_icon || ''}" alt="">
+                        <div class="equip-title">
+                            <div class="equip-name-new">${item.item_name || '未知'}${item.scroll_upgrade ? ` (+${item.scroll_upgrade})` : ''}</div>
+                            <div class="equip-slot-new">${item.item_equipment_part || ''}</div>
+                            ${starforceHtml}
                         </div>
-                        ${potentialHtml}
-                        ${addPotentialHtml}
                     </div>
+                    <div class="equip-grades">
+                        ${gradeStars ? `<div class="grade-row"><span class="grade-label">潛能</span>${gradeStars}</div>` : ''}
+                        ${addGradeStars ? `<div class="grade-row"><span class="grade-label">附加</span>${addGradeStars}</div>` : ''}
+                    </div>
+                    ${buildStatDetails(item)}
+                    ${potentialHtml}
+                    ${addPotentialHtml}
                 </div>
             `}).join('');
+            
+            // 生成等級星星
+            function getGradeStars(grade) {
+                if (!grade) return '';
+                const gradeMap = {
+                    '傳說': { stars: 5, color: '#2ecc71', filled: '★', empty: '☆' },
+                    'LEGENDARY': { stars: 5, color: '#2ecc71', filled: '★', empty: '☆' },
+                    '特殊': { stars: 4, color: '#3498db', filled: '★', empty: '☆' },
+                    'UNIQUE': { stars: 4, color: '#3498db', filled: '★', empty: '☆' },
+                    '罕見': { stars: 3, color: '#f1c40f', filled: '★', empty: '☆' },
+                    'EPIC': { stars: 3, color: '#f1c40f', filled: '★', empty: '☆' },
+                    '稀有': { stars: 2, color: '#9b59b6', filled: '★', empty: '☆' },
+                    'RARE': { stars: 2, color: '#9b59b6', filled: '★', empty: '☆' }
+                };
+                const info = gradeMap[grade];
+                if (!info) return '';
+                const filled = `<span style="color:${info.color}">${info.filled.repeat(info.stars)}</span>`;
+                const empty = `<span style="color:#444">${info.empty.repeat(5 - info.stars)}</span>`;
+                return filled + empty;
+            }
             
             // 添加圖騰顯示
             if (data.title) {
