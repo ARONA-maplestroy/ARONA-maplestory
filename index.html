@@ -1174,7 +1174,7 @@
     <div class="container">
         <!-- 标题 -->
         <div class="header">
-            <h1>🍁 新楓之谷台服</h1>
+            <h1>🍁 新楓之谷</h1>
             <p>角色資訊查询工具</p>
         </div>
 
@@ -1769,8 +1769,8 @@
                 btn.classList.toggle('active', idx === 0);
             });
             
-            // 延迟500ms避免API限流
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // 延迟1500ms避免API限流
+            await new Promise(resolve => setTimeout(resolve, 1500));
             
             try {
                 const result = await apiRequest('/character/ability', { ocid });
@@ -1781,7 +1781,7 @@
                     console.error('Ability API error:', result.error);
                     // 如果是限流錯誤，提示用户稍后重试
                     if (result.error.name === 'OPENAPI00007') {
-                        listEl.innerHTML = '<div class="ability-empty">⏳ 請求过快，請稍后重新整理頁面重试</div>';
+                        listEl.innerHTML = '<div class="ability-empty">⏳ 請求過快，請稍後重新整理頁面</div>';
                     } else {
                         listEl.innerHTML = '<div class="ability-empty">API錯誤: ' + (result.error.message || '未知錯誤') + '</div>';
                     }
