@@ -676,6 +676,61 @@
             border-color: rgba(221,160,221,0.5);
             box-shadow: 0 4px 12px rgba(221,160,221,0.2);
         }
+        /* 寵物樣式 */
+        .fashion-item.pet-item {
+            border-color: rgba(152,251,152,0.3);
+            background: rgba(152,251,152,0.08);
+        }
+        .fashion-item.pet-item:hover {
+            border-color: rgba(152,251,152,0.5);
+            box-shadow: 0 4px 12px rgba(152,251,152,0.2);
+        }
+        .pet-name { color: #98fb98 !important; }
+        .pet-icon { border: 2px solid rgba(152,251,152,0.3); }
+        .pet-equipment {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(152,251,152,0.2);
+        }
+        .pet-equip-header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .pet-equip-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.3);
+        }
+        .pet-equip-info { flex: 1; }
+        .pet-equip-name {
+            font-size: 0.9em;
+            color: #98fb98;
+            font-weight: bold;
+        }
+        .pet-equip-upgrade {
+            font-size: 0.8em;
+            color: #ffd700;
+        }
+        .pet-skills, .pet-auto-skills {
+            margin-top: 8px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        .pet-skill-label {
+            color: #888;
+            margin-right: 5px;
+        }
+        .pet-skill-icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-left: 4px;
+            border-radius: 4px;
+        }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
@@ -2592,19 +2647,20 @@
         async function loadFashion(ocid) {
             if (document.getElementById('fashionGrid').dataset.loaded === 'true') return;
             try {
-                // 並行載入時裝和美容資料
-                const [cashResult, beautyResult] = await Promise.all([
+                // 並行載入時裝、美容和寵物資料
+                const [cashResult, beautyResult, petResult] = await Promise.all([
                     apiRequest('/character/cashitem-equipment', { ocid }),
-                    apiRequest('/character/beauty-equipment', { ocid }).catch(() => null)
+                    apiRequest('/character/beauty-equipment', { ocid }).catch(() => null),
+                    apiRequest('/character/pet-equipment', { ocid }).catch(() => null)
                 ]);
                 
                 cachedFashionData = cashResult;
                 cachedFashionData.beauty_info = beautyResult;
+                cachedFashionData.pet_info = petResult;
                 
                 console.log('👗 Fashion data:', cashResult);
                 console.log('💇 Beauty data:', beautyResult);
-                console.log('💇 Beauty full:', JSON.stringify(beautyResult, null, 2));
-                console.log('👗 Fashion item example:', JSON.stringify(cashResult?.cash_item_equipment_base?.[0], null, 2));
+                console.log('🐾 Pet data:', petResult);
                 
                 displayFashionByPreset(cachedFashionData, currentFashionPreset);
                 document.getElementById('fashionGrid').dataset.loaded = 'true';
@@ -2810,6 +2866,105 @@
                 html += `<div class="fashion-section"><h4 class="fashion-section-title" style="color:#87ceeb;background:rgba(135,206,235,0.1);border-left-color:#87ceeb;">🐾 寵物裝備預設 ${presetNo}</h4><div class="fashion-grid-inner">`;
                 html += sortBySlot(additionalItems).map(item => renderFashionItem(item)).join('');
                 html += '</div></div>';
+            }
+            
+            // 5. 寵物資訊
+            const petInfo = data.pet_info;
+            if (petInfo) {
+                const petSlots = [
+                    { prefix: 'pet_1', num: 1 },
+                    { prefix: 'pet_2', num: 2 },
+                    { prefix: 'pet_3', num: 3 }
+                ];
+                
+                let hasPet = petSlots.some(p => petInfo[p.prefix + '_name']);
+                
+                if (hasPet) {
+                    html += '<div class="fashion-section"><h4 class="fashion-section-title" style="color:#98fb98;background:rgba(152,251,152,0.1);border-left-color:#98fb98;">🐾 寵物</h4><div class="fashion-grid-inner">';
+                    
+                    petSlots.forEach(slot => {
+                        const name = petInfo[slot.prefix + '_name'];
+                        if (!name) return;
+                        
+                        const nickname = petInfo[slot.prefix + '_nickname'] || name;
+                        const icon = petInfo[slot.prefix + '_icon'] || '';
+                        const description = petInfo[slot.prefix + '_description'] || '';
+                        const petType = petInfo[slot.prefix + '_pet_type'] || '';
+                        const appearance = petInfo[slot.prefix + '_appearance'] || '';
+                        const appearanceIcon = petInfo[slot.prefix + '_appearance_icon'] || '';
+                        const dateExpire = petInfo[slot.prefix + '_date_expire'] || '';
+                        const skills = petInfo[slot.prefix + '_skill'] || [];
+                        const autoSkill = petInfo[slot.prefix + '_auto_skill'] || {};
+                        const equipment = petInfo[slot.prefix + '_equipment'] || {};
+                        
+                        // 計算到期時間
+                        let expiryHtml = '';
+                        if (dateExpire) {
+                            const expireDate = new Date(dateExpire);
+                            const now = new Date();
+                            const daysLeft = Math.ceil((expireDate - now) / (1000 * 60 * 60 * 24));
+                            if (daysLeft > 0 && daysLeft < 36500) {
+                                expiryHtml = `<span class="fashion-tag tag-expire">⏰ ${daysLeft} 天</span>`;
+                            }
+                        }
+                        
+                        // 寵物裝備屬性
+                        let equipHtml = '';
+                        if (equipment.item_name) {
+                            const equipOpts = equipment.item_option || [];
+                            const optsHtml = equipOpts.map(opt => 
+                                `<span class="fashion-stat">${opt.option_type} +${opt.option_value}</span>`
+                            ).join('');
+                            
+                            equipHtml = `
+                            <div class="pet-equipment">
+                                <div class="pet-equip-header">
+                                    <img class="pet-equip-icon" src="${equipment.item_icon || ''}" alt="" onerror="this.style.display='none'">
+                                    <div class="pet-equip-info">
+                                        <div class="pet-equip-name">${equipment.item_name}</div>
+                                        <div class="pet-equip-upgrade">+${equipment.scroll_upgrade || 0} 強化</div>
+                                    </div>
+                                </div>
+                                ${optsHtml ? `<div class="fashion-stats">${optsHtml}</div>` : ''}
+                            </div>`;
+                        }
+                        
+                        // 寵物技能
+                        let skillsHtml = '';
+                        if (skills.length > 0) {
+                            skillsHtml = `<div class="pet-skills"><span class="pet-skill-label">技能:</span> ${skills.slice(0, 4).join(', ')}${skills.length > 4 ? '...' : ''}</div>`;
+                        }
+                        
+                        // 自動技能
+                        let autoSkillHtml = '';
+                        if (autoSkill.skill_1) {
+                            autoSkillHtml = `<div class="pet-auto-skills">
+                                <span class="pet-skill-label">自動:</span>
+                                <img class="pet-skill-icon" src="${autoSkill.skill_1_icon || ''}" title="${autoSkill.skill_1}" alt="">
+                                ${autoSkill.skill_2 ? `<img class="pet-skill-icon" src="${autoSkill.skill_2_icon || ''}" title="${autoSkill.skill_2}" alt="">` : ''}
+                            </div>`;
+                        }
+                        
+                        html += `
+                        <div class="fashion-item pet-item">
+                            <div class="fashion-header">
+                                <img class="fashion-icon pet-icon" src="${icon}" alt="" onerror="this.style.display='none'">
+                                <div class="fashion-info">
+                                    <div class="fashion-name pet-name">${nickname}</div>
+                                    <div class="fashion-slot-row">
+                                        <span class="fashion-slot">${petType || name}</span>
+                                        ${expiryHtml}
+                                    </div>
+                                </div>
+                            </div>
+                            ${equipHtml}
+                            ${skillsHtml}
+                            ${autoSkillHtml}
+                        </div>`;
+                    });
+                    
+                    html += '</div></div>';
+                }
             }
             
             if (!html) {
@@ -3135,19 +3290,7 @@
                 grid.innerHTML += buildSpecialEquipCard(android.android_icon, '🤖 Android', android.android_name, android.android_description);
             }
             
-            // 添加寵物顯示
-            if (data.pet_info) {
-                const petFields = [
-                    { name: data.pet_info.pet_1_name, icon: data.pet_info.pet_1_icon },
-                    { name: data.pet_info.pet_2_name, icon: data.pet_info.pet_2_icon },
-                    { name: data.pet_info.pet_3_name, icon: data.pet_info.pet_3_icon }
-                ];
-                petFields.forEach((pet, idx) => {
-                    if (pet.name) {
-                        grid.innerHTML += buildSpecialEquipCard(pet.icon, `🐾 寵物 ${idx + 1}`, pet.name);
-                    }
-                });
-            }
+            // 寵物已移至時裝頁顯示
         }
 
         // 載入符文
