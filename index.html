@@ -550,20 +550,36 @@
         
         /* 時裝網格 */
         .fashion-grid {
+            padding: 10px 0;
+        }
+        .fashion-section {
+            margin-bottom: 25px;
+        }
+        .fashion-section-title {
+            color: #ff69b4;
+            margin: 0 0 15px 0;
+            padding: 10px 15px;
+            background: rgba(255,105,180,0.1);
+            border-radius: 8px;
+            border-left: 4px solid #ff69b4;
+            font-size: 1em;
+        }
+        .fashion-grid-inner {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
         }
         .fashion-item {
             background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 12px;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         .fashion-item:hover {
             border-color: rgba(255,105,180,0.5);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,105,180,0.2);
         }
         .fashion-header {
             display: flex;
@@ -571,52 +587,94 @@
             align-items: center;
         }
         .fashion-icon {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             background: rgba(0,0,0,0.5);
             border-radius: 8px;
-            padding: 5px;
+            object-fit: contain;
+            flex-shrink: 0;
         }
-        .fashion-info { flex: 1; }
+        .beauty-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, rgba(221,160,221,0.3), rgba(255,105,180,0.3));
+        }
+        .fashion-info { flex: 1; min-width: 0; }
         .fashion-name {
             font-weight: bold;
             color: #ff69b4;
-            margin-bottom: 4px;
+            font-size: 0.95em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .beauty-name { color: #dda0dd; }
+        .fashion-slot-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
         }
         .fashion-slot {
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #888;
         }
-        .fashion-label {
-            display: inline-block;
-            font-size: 0.75em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-top: 5px;
+        .fashion-tag {
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
-        .fashion-label.date-label {
+        .tag-expire {
             background: rgba(255,193,7,0.2);
             color: #ffc107;
+        }
+        .fashion-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .fashion-stat {
+            font-size: 0.8em;
+            padding: 3px 8px;
+            background: rgba(102,204,255,0.15);
+            color: #66ccff;
+            border-radius: 4px;
+        }
+        .fashion-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .fashion-opt {
+            font-size: 0.8em;
+            padding: 3px 8px;
+            background: rgba(221,160,221,0.15);
+            color: #dda0dd;
+            border-radius: 4px;
+        }
+        .fashion-color {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 8px;
         }
         .no-fashion {
             text-align: center;
             padding: 40px;
             color: #888;
         }
-        .fashion-section {
-            margin-bottom: 20px;
-        }
-        .fashion-grid-inner {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
         .fashion-item.beauty-item {
             border-color: rgba(221,160,221,0.3);
-            background: rgba(221,160,221,0.05);
+            background: rgba(221,160,221,0.08);
         }
         .fashion-item.beauty-item:hover {
             border-color: rgba(221,160,221,0.5);
+            box-shadow: 0 4px 12px rgba(221,160,221,0.2);
         }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
@@ -2602,43 +2660,48 @@
             function renderFashionItem(item, category = '') {
                 // 計算到期時間
                 let expiryInfo = '';
-                if (item.cash_item_date_expire) {
-                    const expireDate = new Date(item.cash_item_date_expire);
+                if (item.date_expire || item.date_option_expire) {
+                    const expireStr = item.date_expire || item.date_option_expire;
+                    const expireDate = new Date(expireStr);
                     const now = new Date();
                     const daysLeft = Math.ceil((expireDate - now) / (1000 * 60 * 60 * 24));
-                    if (daysLeft > 0) {
-                        expiryInfo = `<span class="fashion-label date-label">剩餘 ${daysLeft} 天</span>`;
-                    } else if (daysLeft === 0) {
-                        expiryInfo = `<span class="fashion-label date-label" style="background:rgba(220,53,69,0.2);color:#dc3545;">今日到期</span>`;
+                    if (daysLeft > 0 && daysLeft < 36500) { // 排除永久道具（100年）
+                        expiryInfo = `<span class="fashion-tag tag-expire">⏰ ${daysLeft} 天</span>`;
                     }
                 }
                 
-                // 時裝選項（染色等）
-                let optionInfo = '';
+                // 時裝屬性
+                let optionsHtml = '';
+                if (item.cash_item_option && item.cash_item_option.length > 0) {
+                    const opts = item.cash_item_option.map(opt => 
+                        `<span class="fashion-stat">${opt.option_type} +${opt.option_value}</span>`
+                    ).join('');
+                    optionsHtml = `<div class="fashion-stats">${opts}</div>`;
+                }
+                
+                // 染色資訊
+                let colorInfo = '';
                 if (item.cash_item_coloring_prism) {
                     const prism = item.cash_item_coloring_prism;
                     if (prism.color_range) {
-                        optionInfo += `<div class="fashion-option" style="font-size:0.8em;color:#aaa;margin-top:5px;">🎨 染色: ${prism.color_range} / ${prism.hue || 0} / ${prism.saturation || 0} / ${prism.value || 0}</div>`;
+                        colorInfo = `<div class="fashion-color">🎨 ${prism.color_range}</div>`;
                     }
-                }
-                
-                // 類別標籤
-                let categoryLabel = '';
-                if (category) {
-                    categoryLabel = `<span class="fashion-label" style="background:rgba(100,149,237,0.2);color:#6495ed;margin-left:5px;">${category}</span>`;
                 }
                 
                 return `
                 <div class="fashion-item">
                     <div class="fashion-header">
-                        <img class="fashion-icon" src="${item.cash_item_icon || ''}" alt="" onerror="this.style.display='none'">
+                        <img class="fashion-icon" src="${item.cash_item_icon || ''}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2220%22>?</text></svg>'">
                         <div class="fashion-info">
                             <div class="fashion-name">${item.cash_item_name || '未知'}</div>
-                            <div class="fashion-slot">${item.cash_item_equipment_part || item.cash_item_equipment_slot || ''}${categoryLabel}</div>
-                            ${expiryInfo}
+                            <div class="fashion-slot-row">
+                                <span class="fashion-slot">${item.cash_item_equipment_part || item.cash_item_equipment_slot || ''}</span>
+                                ${expiryInfo}
+                            </div>
                         </div>
                     </div>
-                    ${optionInfo}
+                    ${optionsHtml}
+                    ${colorInfo}
                 </div>
             `;
             }
@@ -2660,46 +2723,60 @@
             // 0. 美容資訊（髮型、臉型、皮膚）
             const beauty = data.beauty_info;
             if (beauty) {
-                html += '<div class="fashion-section"><h4 style="color:#dda0dd;margin:15px 0 10px;">💇 角色造型</h4><div class="fashion-grid-inner">';
+                html += '<div class="fashion-section"><h4 class="fashion-section-title">💇 角色造型</h4><div class="fashion-grid-inner">';
                 
                 // 髮型
                 if (beauty.character_hair) {
+                    const hair = beauty.character_hair;
                     html += `
                     <div class="fashion-item beauty-item">
                         <div class="fashion-header">
-                            <img class="fashion-icon" src="${beauty.character_hair?.hair_icon || ''}" alt="" onerror="this.style.display='none'">
+                            <div class="fashion-icon beauty-icon">💇</div>
                             <div class="fashion-info">
-                                <div class="fashion-name" style="color:#dda0dd;">${beauty.character_hair?.hair_name || '髮型'}</div>
-                                <div class="fashion-slot">💇 髮型</div>
+                                <div class="fashion-name beauty-name">${hair.hair_name || '髮型'}</div>
+                                <div class="fashion-slot">髮型</div>
                             </div>
+                        </div>
+                        <div class="fashion-options">
+                            ${hair.base_color ? `<span class="fashion-opt">髮色: ${hair.base_color}</span>` : ''}
+                            ${hair.mix_color ? `<span class="fashion-opt">混染: ${hair.mix_color} (${hair.mix_rate}%)</span>` : ''}
                         </div>
                     </div>`;
                 }
                 
                 // 臉型
                 if (beauty.character_face) {
+                    const face = beauty.character_face;
                     html += `
                     <div class="fashion-item beauty-item">
                         <div class="fashion-header">
-                            <img class="fashion-icon" src="${beauty.character_face?.face_icon || ''}" alt="" onerror="this.style.display='none'">
+                            <div class="fashion-icon beauty-icon">👤</div>
                             <div class="fashion-info">
-                                <div class="fashion-name" style="color:#dda0dd;">${beauty.character_face?.face_name || '臉型'}</div>
-                                <div class="fashion-slot">👤 臉型</div>
+                                <div class="fashion-name beauty-name">${face.face_name || '臉型'}</div>
+                                <div class="fashion-slot">臉型</div>
                             </div>
+                        </div>
+                        <div class="fashion-options">
+                            ${face.base_color ? `<span class="fashion-opt">瞳色: ${face.base_color}</span>` : ''}
+                            ${face.mix_color ? `<span class="fashion-opt">混染: ${face.mix_color} (${face.mix_rate}%)</span>` : ''}
                         </div>
                     </div>`;
                 }
                 
                 // 皮膚
-                if (beauty.character_skin_name) {
+                if (beauty.character_skin) {
+                    const skin = beauty.character_skin;
                     html += `
                     <div class="fashion-item beauty-item">
                         <div class="fashion-header">
-                            <div class="fashion-icon" style="background:linear-gradient(135deg,#ffecd2,#fcb69f);display:flex;align-items:center;justify-content:center;font-size:24px;">🎨</div>
+                            <div class="fashion-icon beauty-icon">🎨</div>
                             <div class="fashion-info">
-                                <div class="fashion-name" style="color:#dda0dd;">${beauty.character_skin_name || '皮膚'}</div>
-                                <div class="fashion-slot">🎨 皮膚</div>
+                                <div class="fashion-name beauty-name">${skin.skin_name || '皮膚'}</div>
+                                <div class="fashion-slot">皮膚</div>
                             </div>
+                        </div>
+                        <div class="fashion-options">
+                            ${skin.color_style ? `<span class="fashion-opt">風格: ${skin.color_style}</span>` : ''}
                         </div>
                     </div>`;
                 }
@@ -2709,28 +2786,28 @@
             
             // 1. 角色身上的時裝（基礎）
             if (baseItems && baseItems.length > 0) {
-                html += '<div class="fashion-section"><h4 style="color:#ff69b4;margin:15px 0 10px;">👤 角色時裝</h4><div class="fashion-grid-inner">';
+                html += '<div class="fashion-section"><h4 class="fashion-section-title">👤 角色時裝</h4><div class="fashion-grid-inner">';
                 html += sortBySlot(baseItems).map(item => renderFashionItem(item)).join('');
                 html += '</div></div>';
             }
             
             // 2. 預設時裝（如果與基礎不同）
             if (fashionItems && fashionItems.length > 0) {
-                html += `<div class="fashion-section"><h4 style="color:#ff69b4;margin:15px 0 10px;">📦 預設 ${presetNo} 時裝</h4><div class="fashion-grid-inner">`;
+                html += `<div class="fashion-section"><h4 class="fashion-section-title">📦 預設 ${presetNo} 時裝</h4><div class="fashion-grid-inner">`;
                 html += sortBySlot(fashionItems).map(item => renderFashionItem(item)).join('');
                 html += '</div></div>';
             }
             
             // 3. 寵物裝備（基礎）
             if (additionalBaseItems && additionalBaseItems.length > 0) {
-                html += '<div class="fashion-section"><h4 style="color:#87ceeb;margin:15px 0 10px;">🐾 寵物裝備</h4><div class="fashion-grid-inner">';
+                html += '<div class="fashion-section"><h4 class="fashion-section-title" style="color:#87ceeb;background:rgba(135,206,235,0.1);border-left-color:#87ceeb;">🐾 寵物裝備</h4><div class="fashion-grid-inner">';
                 html += sortBySlot(additionalBaseItems).map(item => renderFashionItem(item)).join('');
                 html += '</div></div>';
             }
             
             // 4. 寵物裝備預設
             if (additionalItems && additionalItems.length > 0) {
-                html += `<div class="fashion-section"><h4 style="color:#87ceeb;margin:15px 0 10px;">🐾 寵物裝備預設 ${presetNo}</h4><div class="fashion-grid-inner">`;
+                html += `<div class="fashion-section"><h4 class="fashion-section-title" style="color:#87ceeb;background:rgba(135,206,235,0.1);border-left-color:#87ceeb;">🐾 寵物裝備預設 ${presetNo}</h4><div class="fashion-grid-inner">`;
                 html += sortBySlot(additionalItems).map(item => renderFashionItem(item)).join('');
                 html += '</div></div>';
             }
