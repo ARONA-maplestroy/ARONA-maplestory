@@ -533,6 +533,8 @@
         
         .equip-item { min-height: 120px; }
         .equip-item.equip-special { border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.05); }
+        .equip-item-new.equip-special-new { border: 1px solid rgba(255, 193, 7, 0.3); background: rgba(255, 193, 7, 0.08); }
+        .equip-desc { font-size: 0.8em; color: #aaa; margin-top: 4px; }
         
         /* 裝備預設選擇器 */
         .equip-preset-selector {
@@ -2460,6 +2462,14 @@
         function displayEquipmentByPreset(data, presetNo) {
             console.log('📋 displayEquipmentByPreset called, presetNo:', presetNo);
             console.log('📋 Available keys:', Object.keys(data));
+            console.log('📋 Full equipment data:', JSON.stringify(data, null, 2));
+            
+            // 打印所有可能的特殊裝備字段
+            console.log('🐉 dragon_equipment:', data.dragon_equipment);
+            console.log('⚙️ mechanic_equipment:', data.mechanic_equipment);
+            console.log('🏷️ title:', data.title);
+            console.log('💎 item_equipment (檢查寶玉):', data.item_equipment?.filter(i => i.item_equipment_slot?.includes('寶玉') || i.item_equipment_part?.includes('寶玉')));
+            console.log('🔮 所有裝備部位:', data.item_equipment?.map(i => i.item_equipment_part || i.item_equipment_slot));
             
             const grid = document.getElementById('equipGrid');
             
@@ -2645,82 +2655,58 @@
                 return filled + empty;
             }
             
-            // 添加圖騰顯示
-            if (data.title) {
-                const title = data.title;
-                grid.innerHTML += `
-                    <div class="equip-item equip-special">
-                        <img class="equip-icon" src="${title.title_icon || ''}" alt="">
-                        <div class="equip-info">
-                            <div class="equip-slot">🏷️ 稱號</div>
-                            <div class="equip-name">${title.title_name || '未知'}</div>
-                            <div class="equip-stats">${title.title_description || ''}</div>
+            // 構建特殊裝備卡片
+            function buildSpecialEquipCard(icon, slot, name, desc = '') {
+                return `
+                    <div class="equip-item-new equip-special-new">
+                        <div class="equip-header">
+                            <img class="equip-icon-large" src="${icon || ''}" alt="" onerror="this.style.display='none'">
+                            <div class="equip-title">
+                                <div class="equip-name-new">${name || '未知'}</div>
+                                <div class="equip-slot-new">${slot}</div>
+                                ${desc ? `<div class="equip-desc">${desc}</div>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
             }
             
-            // 添加龍之寶玉顯示
+            // 添加稱號顯示
+            if (data.title) {
+                const title = data.title;
+                grid.innerHTML += buildSpecialEquipCard(title.title_icon, '🏷️ 稱號', title.title_name, title.title_description);
+            }
+            
+            // 添加龍之裝備顯示（龍騎士專用）
             if (data.dragon_equipment && data.dragon_equipment.length > 0) {
                 data.dragon_equipment.forEach(item => {
-                    grid.innerHTML += `
-                        <div class="equip-item equip-special">
-                            <img class="equip-icon" src="${item.item_icon || ''}" alt="">
-                            <div class="equip-info">
-                                <div class="equip-slot">🐉 龍之寶玉</div>
-                                <div class="equip-name">${item.item_name || '未知'}</div>
-                                <div class="equip-stats">${item.item_description || ''}</div>
-                            </div>
-                        </div>
-                    `;
+                    grid.innerHTML += buildSpecialEquipCard(item.item_icon, '🐉 龍之裝備', item.item_name, item.item_description);
                 });
             }
             
-            // 添加機械心臟顯示
+            // 添加機械裝備顯示（乘坐型機械專用）
             if (data.mechanic_equipment && data.mechanic_equipment.length > 0) {
                 data.mechanic_equipment.forEach(item => {
-                    grid.innerHTML += `
-                        <div class="equip-item equip-special">
-                            <img class="equip-icon" src="${item.item_icon || ''}" alt="">
-                            <div class="equip-info">
-                                <div class="equip-slot">⚙️ 機械裝備</div>
-                                <div class="equip-name">${item.item_name || '未知'}</div>
-                            </div>
-                        </div>
-                    `;
+                    grid.innerHTML += buildSpecialEquipCard(item.item_icon, '⚙️ 機械裝備', item.item_name);
                 });
             }
             
             // 添加Android顯示
             if (data.android_info && data.android_info.android_name) {
                 const android = data.android_info;
-                grid.innerHTML += `
-                    <div class="equip-item equip-special">
-                        <img class="equip-icon" src="${android.android_icon || ''}" alt="">
-                        <div class="equip-info">
-                            <div class="equip-slot">🤖 Android</div>
-                            <div class="equip-name">${android.android_name || '未知'}</div>
-                            <div class="equip-stats">${android.android_description || ''}</div>
-                        </div>
-                    </div>
-                `;
+                grid.innerHTML += buildSpecialEquipCard(android.android_icon, '🤖 Android', android.android_name, android.android_description);
             }
             
             // 添加寵物顯示
             if (data.pet_info) {
-                const pets = [data.pet_info.pet_1_name, data.pet_info.pet_2_name, data.pet_info.pet_3_name];
-                const petIcons = [data.pet_info.pet_1_icon, data.pet_info.pet_2_icon, data.pet_info.pet_3_icon];
-                pets.forEach((petName, idx) => {
-                    if (petName) {
-                        grid.innerHTML += `
-                            <div class="equip-item equip-special">
-                                <img class="equip-icon" src="${petIcons[idx] || ''}" alt="">
-                                <div class="equip-info">
-                                    <div class="equip-slot">🐾 寵物 ${idx + 1}</div>
-                                    <div class="equip-name">${petName}</div>
-                                </div>
-                            </div>
-                        `;
+                const petFields = [
+                    { name: data.pet_info.pet_1_name, icon: data.pet_info.pet_1_icon },
+                    { name: data.pet_info.pet_2_name, icon: data.pet_info.pet_2_icon },
+                    { name: data.pet_info.pet_3_name, icon: data.pet_info.pet_3_icon }
+                ];
+                petFields.forEach((pet, idx) => {
+                    if (pet.name) {
+                        grid.innerHTML += buildSpecialEquipCard(pet.icon, `🐾 寵物 ${idx + 1}`, pet.name);
                     }
                 });
             }
