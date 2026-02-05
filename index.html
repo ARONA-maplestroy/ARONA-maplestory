@@ -611,6 +611,13 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 15px;
         }
+        .fashion-item.beauty-item {
+            border-color: rgba(221,160,221,0.3);
+            background: rgba(221,160,221,0.05);
+        }
+        .fashion-item.beauty-item:hover {
+            border-color: rgba(221,160,221,0.5);
+        }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
@@ -2527,10 +2534,19 @@
         async function loadFashion(ocid) {
             if (document.getElementById('fashionGrid').dataset.loaded === 'true') return;
             try {
-                const result = await apiRequest('/character/cashitem-equipment', { ocid });
-                cachedFashionData = result;
-                console.log('👗 Fashion data:', result);
-                displayFashionByPreset(result, currentFashionPreset);
+                // 並行載入時裝和美容資料
+                const [cashResult, beautyResult] = await Promise.all([
+                    apiRequest('/character/cashitem-equipment', { ocid }),
+                    apiRequest('/character/beauty-equipment', { ocid }).catch(() => null)
+                ]);
+                
+                cachedFashionData = cashResult;
+                cachedFashionData.beauty_info = beautyResult;
+                
+                console.log('👗 Fashion data:', cashResult);
+                console.log('💇 Beauty data:', beautyResult);
+                
+                displayFashionByPreset(cachedFashionData, currentFashionPreset);
                 document.getElementById('fashionGrid').dataset.loaded = 'true';
             } catch (e) {
                 console.error('Load fashion error:', e);
@@ -2638,6 +2654,56 @@
             }
             
             let html = '';
+            
+            // 0. 美容資訊（髮型、臉型、皮膚）
+            const beauty = data.beauty_info;
+            if (beauty) {
+                html += '<div class="fashion-section"><h4 style="color:#dda0dd;margin:15px 0 10px;">💇 角色造型</h4><div class="fashion-grid-inner">';
+                
+                // 髮型
+                if (beauty.character_hair) {
+                    html += `
+                    <div class="fashion-item beauty-item">
+                        <div class="fashion-header">
+                            <img class="fashion-icon" src="${beauty.character_hair?.hair_icon || ''}" alt="" onerror="this.style.display='none'">
+                            <div class="fashion-info">
+                                <div class="fashion-name" style="color:#dda0dd;">${beauty.character_hair?.hair_name || '髮型'}</div>
+                                <div class="fashion-slot">💇 髮型</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                
+                // 臉型
+                if (beauty.character_face) {
+                    html += `
+                    <div class="fashion-item beauty-item">
+                        <div class="fashion-header">
+                            <img class="fashion-icon" src="${beauty.character_face?.face_icon || ''}" alt="" onerror="this.style.display='none'">
+                            <div class="fashion-info">
+                                <div class="fashion-name" style="color:#dda0dd;">${beauty.character_face?.face_name || '臉型'}</div>
+                                <div class="fashion-slot">👤 臉型</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                
+                // 皮膚
+                if (beauty.character_skin_name) {
+                    html += `
+                    <div class="fashion-item beauty-item">
+                        <div class="fashion-header">
+                            <div class="fashion-icon" style="background:linear-gradient(135deg,#ffecd2,#fcb69f);display:flex;align-items:center;justify-content:center;font-size:24px;">🎨</div>
+                            <div class="fashion-info">
+                                <div class="fashion-name" style="color:#dda0dd;">${beauty.character_skin_name || '皮膚'}</div>
+                                <div class="fashion-slot">🎨 皮膚</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                
+                html += '</div></div>';
+            }
             
             // 1. 角色身上的時裝（基礎）
             if (baseItems && baseItems.length > 0) {
