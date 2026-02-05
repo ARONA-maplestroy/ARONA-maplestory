@@ -2475,19 +2475,52 @@
             
             // 選擇对应預設的裝備資料
             let equipment;
+            let presetEquipment;
+            
             if (presetNo === 1) {
-                equipment = data.item_equipment_preset_1 || data.item_equipment || [];
-                console.log('📋 Using preset_1, items:', equipment?.length);
+                presetEquipment = data.item_equipment_preset_1 || [];
             } else if (presetNo === 2) {
-                equipment = data.item_equipment_preset_2 || [];
-                console.log('📋 Using preset_2, items:', equipment?.length);
+                presetEquipment = data.item_equipment_preset_2 || [];
             } else if (presetNo === 3) {
-                equipment = data.item_equipment_preset_3 || [];
-                console.log('📋 Using preset_3, items:', equipment?.length);
+                presetEquipment = data.item_equipment_preset_3 || [];
             } else {
-                equipment = data.item_equipment || [];
-                console.log('📋 Using default, items:', equipment?.length);
+                presetEquipment = [];
             }
+            
+            // 獲取預設中已有的裝備部位
+            const presetParts = new Set(presetEquipment.map(i => i.item_equipment_part));
+            
+            // 從 item_equipment 中獲取預設中沒有的裝備（如寶玉、輪迴碑石、圖騰等）
+            const additionalEquipment = (data.item_equipment || []).filter(item => {
+                // 這些部位可能不在預設中，需要額外添加
+                const specialParts = ['馬鞍', '怪物裝備', '馴服的怪物'];
+                const part = item.item_equipment_part || '';
+                
+                // 如果是特殊部位且預設中沒有這個部位，則添加
+                if (specialParts.some(sp => part.includes(sp))) {
+                    return !presetParts.has(part);
+                }
+                
+                // 如果是墜飾，檢查是否已經有3個墜飾
+                if (part === '墜飾') {
+                    const pendantCount = presetEquipment.filter(e => e.item_equipment_part === '墜飾').length;
+                    if (pendantCount < 3) {
+                        // 檢查這個墜飾是否已在預設中（通過名稱判斷）
+                        const existingNames = presetEquipment.filter(e => e.item_equipment_part === '墜飾').map(e => e.item_name);
+                        return !existingNames.includes(item.item_name);
+                    }
+                }
+                
+                return false;
+            });
+            
+            // 合併預設裝備和額外裝備
+            equipment = [...presetEquipment, ...additionalEquipment];
+            
+            console.log('📋 Preset equipment count:', presetEquipment.length);
+            console.log('📋 Additional equipment count:', additionalEquipment.length);
+            console.log('📋 Total equipment count:', equipment.length);
+            console.log('📋 Additional items:', additionalEquipment.map(i => i.item_equipment_part + ': ' + i.item_name));
             
             if (!equipment || equipment.length === 0) {
                 grid.innerHTML = '<div class="no-equip">该預設暫無裝備資料</div>';
