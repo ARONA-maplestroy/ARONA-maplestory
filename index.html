@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍁 新枫之谷台服 - 角色查询</title>
+    <title>🍁 新楓之谷台服 - 角色查詢</title>
     <style>
         * {
             margin: 0;
@@ -24,7 +24,7 @@
             padding: 20px;
         }
 
-        /* 标题区域 */
+        /* 標題區域 */
         .header {
             text-align: center;
             padding: 40px 0;
@@ -44,7 +44,7 @@
             font-size: 1.1em;
         }
 
-        /* 搜索区域 */
+        /* 搜尋區域 */
         .search-box {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -102,7 +102,7 @@
             transform: none;
         }
 
-        /* 加载动画 */
+        /* 載入动画 */
         .loading {
             display: none;
             text-align: center;
@@ -127,7 +127,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 错误信息 */
+        /* 錯誤訊息 */
         .error {
             display: none;
             background: rgba(255, 107, 107, 0.2);
@@ -142,7 +142,7 @@
             display: block;
         }
 
-        /* 结果区域 */
+        /* 結果區域 */
         .result {
             display: none;
         }
@@ -226,7 +226,7 @@
             font-weight: bold;
         }
 
-        /* 经验进度条 */
+        /* 經驗進度條 */
         .exp-bar-container {
             margin: 15px 25px 0;
             padding: 10px 15px;
@@ -261,7 +261,7 @@
             transition: width 0.5s ease;
         }
 
-        /* 预设选择器 */
+        /* 預設選擇器 */
         .preset-selector {
             display: flex;
             align-items: center;
@@ -304,7 +304,7 @@
             margin-left: auto;
         }
 
-        /* 属性区域 */
+        /* 屬性區域 */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -353,7 +353,7 @@
             font-size: 1.1em;
         }
 
-        /* 选项卡 */
+        /* 選項卡 */
         .tabs {
             display: flex;
             gap: 10px;
@@ -376,7 +376,7 @@
             border-bottom-color: #ff9a56;
         }
 
-        /* 符文和技能网格 */
+        /* 符文和技能網格 */
         .symbol-grid, .skill-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -412,7 +412,7 @@
         .tab-content { display: none; padding: 20px 25px; }
         .tab-content.active { display: block; }
 
-        /* 装备列表 */
+        /* 裝備列表 */
         .equip-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -456,7 +456,7 @@
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
 
-        /* 战斗力区域 */
+        /* 戰鬥力區域 */
         .combat-power-section {
             display: flex;
             align-items: center;
@@ -520,7 +520,7 @@
             color: #56c5ff;
         }
 
-        /* 联盟样式 */
+        /* 聯盟樣式 */
         .union-loading {
             text-align: center;
             padding: 20px;
@@ -704,7 +704,7 @@
             margin-bottom: 10px;
         }
 
-        /* 联盟拼图样式 */
+        /* 聯盟拼图样式 */
         .union-puzzle-container {
             overflow-x: auto;
             padding: 10px;
@@ -908,7 +908,7 @@
             font-weight: bold;
         }
 
-        /* 排行榜区域 */
+        /* 排行榜區域 */
         .ranking-section {
             display: none;
         }
@@ -1109,7 +1109,7 @@
             color: #666;
         }
 
-        /* 响应式排行榜 */
+        /* 回應式排行榜 */
         @media (max-width: 900px) {
             .ranking-header, .ranking-item {
                 grid-template-columns: 50px 60px 1fr 100px 130px;
@@ -1139,7 +1139,7 @@
             }
         }
 
-        /* 响应式 */
+        /* 回應式 */
         @media (max-width: 600px) {
             .search-form {
                 flex-direction: column;
@@ -1165,7 +1165,7 @@
         }
     </style>
     <script>
-    // 职业数据 - 使用decodeURIComponent解码避免编码问题
+    // 職業資料 - 使用decodeURIComponent解码避免编码问题
     const TW_CLASS_DATA = JSON.parse(decodeURIComponent('%5B%5B%22%E5%86%92%E9%9A%AA%E5%AE%B6-%E6%88%B0%E5%A3%AB%22%2C%5B%22%E8%81%96%E9%A8%8E%E5%A3%AB%22%2C%22%E9%BB%91%E9%A8%8E%E5%A3%AB%22%2C%22%E8%8B%B1%E9%9B%84%22%5D%5D%2C%5B%22%E5%86%92%E9%9A%AA%E5%AE%B6-%E6%B3%95%E5%B8%AB%22%2C%5B%22%E7%81%AB%E6%AF%92%E9%AD%94%E5%B0%8E%E5%A3%AB%22%2C%22%E5%86%B0%E9%9B%B7%E9%AD%94%E5%B0%8E%E5%A3%AB%22%2C%22%E4%B8%BB%E6%95%99%22%5D%5D%2C%5B%22%E5%86%92%E9%9A%AA%E5%AE%B6-%E5%BC%93%E7%AE%AD%E6%89%8B%22%2C%5B%22%E7%AE%AD%E7%A5%9E%22%2C%22%E7%A5%9E%E5%B0%84%E6%89%8B%22%2C%22%E5%8F%A4%E4%BB%A3%E7%A5%9E%E5%B0%84%E6%89%8B%22%5D%5D%2C%5B%22%E5%86%92%E9%9A%AA%E5%AE%B6-%E7%9B%9C%E8%B3%8A%22%2C%5B%22%E5%A4%9C%E4%BD%BF%E8%80%85%22%2C%22%E6%9A%97%E5%BD%B1%E7%A5%9E%E5%81%B7%22%2C%22%E5%BD%B1%E6%AD%A6%E8%80%85%22%5D%5D%2C%5B%22%E5%86%92%E9%9A%AA%E5%AE%B6-%E6%B5%B7%E7%9B%9C%22%2C%5B%22%E6%8B%B3%E9%9C%B8%22%2C%22%E6%A7%8D%E7%A5%9E%22%2C%22%E8%88%B9%E9%95%B7%22%5D%5D%2C%5B%22%E7%9A%87%E5%AE%B6%E9%A8%8E%E5%A3%AB%E5%9C%98%22%2C%5B%22%E9%AD%82%E9%A8%8E%E5%A3%AB%22%2C%22%E7%83%88%E7%84%B0%E5%B7%AB%E5%B8%AB%22%2C%22%E7%8B%82%E9%A2%A8%E7%A5%9E%E5%B0%84%22%2C%22%E6%9A%97%E5%BD%B1%E9%9B%99%E5%88%80%22%2C%22%E9%96%83%E9%9B%B7%E6%82%8D%E5%B0%87%22%5D%5D%2C%5B%22%E8%8B%B1%E9%9B%84%22%2C%5B%22%E7%8B%82%E7%8B%BC%E5%8B%87%E5%A3%AB%22%2C%22%E9%BE%8D%E9%AD%94%E5%B0%8E%E5%A3%AB%22%2C%22%E7%B2%BE%E9%9D%88%E9%81%8A%E4%BF%A0%22%2C%22%E5%B9%BB%E5%BD%B1%E4%BF%A0%E7%9B%9C%22%2C%22%E9%9A%B1%E6%9C%88%22%2C%22%E9%9B%99%E5%BC%A9%E7%B2%BE%E9%9D%88%22%5D%5D%2C%5B%22%E5%8F%8D%E6%8A%97%E8%BB%8D%22%2C%5B%22%E7%88%86%E7%A0%B4%E6%89%8B%22%2C%22%E6%A9%9F%E7%94%B2%E6%88%B0%E7%A5%9E%22%2C%22%E8%B1%B9%E5%BC%A9%E9%81%8A%E4%BF%A0%22%2C%22%E9%87%8D%E7%A0%B2%E6%8C%87%E6%8F%AE%E5%AE%98%22%2C%22%E6%83%A1%E9%AD%94%E6%AE%BA%E6%89%8B%22%2C%22%E6%83%A1%E9%AD%94%E5%BE%A9%E4%BB%87%E8%80%85%22%5D%5D%2C%5B%22%E8%B6%85%E6%96%B0%E6%98%9F%22%2C%5B%22%E5%87%B1%E8%96%A9%22%2C%22%E5%A4%A9%E4%BD%BF%E7%A0%B4%E5%A3%9E%E8%80%85%22%2C%22%E5%8D%A1%E8%92%82%E5%A8%9C%22%5D%5D%2C%5B%22%E6%9B%89%E4%B9%8B%E9%99%A3%22%2C%5B%22%E7%B1%B3%E5%93%88%E9%80%B8%22%5D%5D%2C%5B%22%E7%A5%9E%E4%B9%8B%E5%AD%90%22%2C%5B%22%E7%A5%9E%E4%B9%8B%E5%AD%90%22%5D%5D%2C%5B%22%E8%B6%85%E8%83%BD%E5%8A%9B%E8%80%85%22%2C%5B%22%E5%87%B1%E5%85%A7%E8%A5%BF%E6%96%AF%22%5D%5D%2C%5B%22%E5%85%B6%E4%BB%96%22%2C%5B%22%E5%8A%8D%E8%B1%AA%22%2C%22%E9%99%B0%E9%99%BD%E5%B8%AB%22%2C%22%E5%A2%A8%E7%8E%84%22%2C%22%E7%90%B3%E6%81%A9%22%5D%5D%2C%5B%22%E9%98%BF%E5%B0%BC%E7%91%AA%22%2C%5B%22%E8%99%8E%E5%BD%B1%22%2C%22%E8%8F%88%E8%8F%88%22%2C%22%E8%93%AE%22%2C%22%E4%BA%9E%E5%85%8B%22%5D%5D%2C%5B%22%E8%AB%BE%E5%B7%B4%22%2C%5B%22%E9%98%BF%E6%88%B4%E7%88%BE%22%2C%22%E4%BC%8A%E5%88%A9%E6%81%A9%22%5D%5D%5D'));
     </script>
 </head>
@@ -1173,36 +1173,36 @@
     <div class="container">
         <!-- 标题 -->
         <div class="header">
-            <h1>🍁 新枫之谷台服</h1>
-            <p>角色信息查询工具</p>
+            <h1>🍁 新楓之谷台服</h1>
+            <p>角色資訊查询工具</p>
         </div>
 
         <!-- 导航切换 - 排行榜功能暂时隐藏（台服API未开放） -->
         <!--
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchMainTab('search')">🔍 角色查询</button>
-            <button class="nav-tab" onclick="switchMainTab('ranking')">🏆 战斗力排行</button>
+            <button class="nav-tab active" onclick="switchMainTab('search')">🔍 角色查詢</button>
+            <button class="nav-tab" onclick="switchMainTab('ranking')">🏆 戰鬥力排行</button>
         </div>
         -->
 
-        <!-- 角色查询区域 -->
+        <!-- 角色查詢區域 -->
         <div id="search-section">
-        <!-- 搜索框 -->
+        <!-- 搜尋框 -->
         <div class="search-box">
             <form class="search-form" onsubmit="searchCharacter(event)">
                 <input type="text" id="characterName" class="search-input" 
-                       placeholder="输入角色名称（繁体中文）" autocomplete="off">
+                       placeholder="輸入角色名称（繁体中文）" autocomplete="off">
                 <button type="submit" class="search-btn" id="searchBtn">🔍 查询</button>
             </form>
         </div>
 
-        <!-- 加载动画 -->
+        <!-- 載入动画 -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>正在查询角色信息...</p>
+            <p>正在查询角色資訊...</p>
         </div>
 
-        <!-- 错误信息 -->
+        <!-- 錯誤訊息 -->
         <div class="error" id="error">
             <p id="errorMsg">查询失败</p>
         </div>
@@ -1216,14 +1216,14 @@
                         <h2 id="charName">角色名称</h2>
                         <div class="meta">
                             <span class="meta-item level" id="charLevel">Lv.000</span>
-                            <span class="meta-item" id="charClass">职业</span>
+                            <span class="meta-item" id="charClass">職業</span>
                             <span class="meta-item" id="charWorld"><span class="server-icon" id="serverIcon">🌍</span><span id="serverName">世界</span></span>
                             <span class="meta-item" id="charGuild"><span class="guild-icon">⚔</span><span id="guildName">公会</span></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 经验进度条 -->
+                <!-- 經驗進度條 -->
                 <div class="exp-bar-container">
                     <div class="exp-bar-label">
                         <span>EXP</span>
@@ -1234,30 +1234,30 @@
                     </div>
                 </div>
 
-                <!-- 预设选择 -->
+                <!-- 預設選擇 -->
                 <div class="preset-selector">
-                    <span class="preset-label">装备预设:</span>
-                    <button class="preset-btn active" onclick="changePreset(1)">预设 1</button>
-                    <button class="preset-btn" onclick="changePreset(2)">预设 2</button>
-                    <button class="preset-btn" onclick="changePreset(3)">预设 3</button>
-                    <span class="preset-note">(仅切换装备显示)</span>
+                    <span class="preset-label">裝備預設:</span>
+                    <button class="preset-btn active" onclick="changePreset(1)">預設 1</button>
+                    <button class="preset-btn" onclick="changePreset(2)">預設 2</button>
+                    <button class="preset-btn" onclick="changePreset(3)">預設 3</button>
+                    <span class="preset-note">(仅切换裝備顯示)</span>
                 </div>
 
-                <!-- 选项卡 -->
+                <!-- 選項卡 -->
                 <div class="tabs">
                     <button class="tab-btn active" onclick="switchTab('stats')">📊 属性</button>
-                    <button class="tab-btn" onclick="switchTab('equip')">⚔️ 装备</button>
+                    <button class="tab-btn" onclick="switchTab('equip')">⚔️ 裝備</button>
                     <button class="tab-btn" onclick="switchTab('symbol')">🔮 符文</button>
                     <button class="tab-btn" onclick="switchTab('skill')">✨ 技能</button>
-                    <button class="tab-btn" onclick="switchTab('union')">🏰 联盟</button>
+                    <button class="tab-btn" onclick="switchTab('union')">🏰 聯盟</button>
                 </div>
 
                 <!-- 属性页 -->
                 <div class="tab-content active" id="tab-stats">
-                    <!-- 战斗力 -->
+                    <!-- 戰鬥力 -->
                     <div class="combat-power-section">
                         <div class="combat-power-main">
-                            <div class="combat-power-label">⚔️ 当前战斗力</div>
+                            <div class="combat-power-label">⚔️ 當前戰鬥力</div>
                             <div class="combat-power-value" id="combatPower">0</div>
                         </div>
                         <div class="combat-power-history">
@@ -1272,7 +1272,7 @@
                         </div>
                     </div>
 
-                    <!-- 属性网格 -->
+                    <!-- 属性網格 -->
                     <div class="stats-grid">
                     <!-- 战斗属性 -->
                     <div class="stat-section">
@@ -1361,7 +1361,7 @@
                             <span class="stat-value" id="statMeso">0%</span>
                         </div>
                         <div class="stat-row">
-                            <span class="stat-name">额外经验值</span>
+                            <span class="stat-name">额外經驗值</span>
                             <span class="stat-value" id="statExp">0%</span>
                         </div>
                         <div class="stat-row">
@@ -1383,20 +1383,20 @@
                             <button class="ability-preset-btn" onclick="changeAbilityPreset(3)">第 3 页</button>
                         </div>
                         <div class="ability-list" id="abilityList">
-                            <div class="ability-loading">加载中...</div>
+                            <div class="ability-loading">載入中...</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 装备页 -->
+        <!-- 裝備页 -->
         <div class="tab-content" id="tab-equip">
             <div class="stats-grid">
                 <div class="stat-section" style="grid-column: 1/-1;">
-                    <h3>⚔️ 装备详情</h3>
+                    <h3>⚔️ 裝備詳情</h3>
                     <div class="equip-grid" id="equipGrid" data-loaded="false">
-                        <div class="no-equip">👆 点击"装备"选项卡加载装备数据</div>
+                        <div class="no-equip">👆 点击"裝備"選項卡載入裝備資料</div>
                     </div>
                 </div>
             </div>
@@ -1408,7 +1408,7 @@
                 <div class="stat-section" style="grid-column: 1/-1;">
                     <h3>🔮 符文系统</h3>
                     <div class="symbol-grid" id="symbolGrid" data-loaded="false">
-                        <div class="no-equip">👆 点击"符文"选项卡加载数据</div>
+                        <div class="no-equip">👆 点击"符文"選項卡載入資料</div>
                     </div>
                 </div>
             </div>
@@ -1420,52 +1420,52 @@
                 <div class="stat-section" style="grid-column: 1/-1;">
                     <h3>✨ V矩陣 & HEXA</h3>
                     <div class="skill-grid" id="skillGrid" data-loaded="false">
-                        <div class="no-equip">👆 点击"技能"选项卡加载数据</div>
+                        <div class="no-equip">👆 点击"技能"選項卡載入資料</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 联盟页 -->
+        <!-- 聯盟页 -->
         <div class="tab-content" id="tab-union">
             <div class="stats-grid">
-                <!-- 联盟等级 -->
+                <!-- 聯盟等级 -->
                 <div class="stat-section">
-                    <h3>🏰 联盟等级</h3>
+                    <h3>🏰 聯盟等级</h3>
                     <div class="union-level-info" id="unionLevelInfo">
-                        <div class="union-loading">👆 点击"联盟"选项卡加载数据</div>
+                        <div class="union-loading">👆 点击"聯盟"選項卡載入資料</div>
                     </div>
                 </div>
 
-                <!-- 联盟神器 -->
+                <!-- 聯盟神器 -->
                 <div class="stat-section">
-                    <h3>🔱 联盟神器</h3>
+                    <h3>🔱 聯盟神器</h3>
                     <div class="union-artifact-info" id="unionArtifactInfo">
-                        <div class="union-loading">加载中...</div>
+                        <div class="union-loading">載入中...</div>
                     </div>
                 </div>
 
-                <!-- 冠军联盟 -->
+                <!-- 冠军聯盟 -->
                 <div class="stat-section" style="grid-column: 1/-1;">
-                    <h3>👑 冠军联盟</h3>
+                    <h3>👑 冠军聯盟</h3>
                     <div class="union-champion-info" id="unionChampionInfo">
-                        <div class="union-loading">加载中...</div>
+                        <div class="union-loading">載入中...</div>
                     </div>
                 </div>
 
-                <!-- 联盟攻击队 -->
+                <!-- 聯盟攻击队 -->
                 <div class="stat-section" style="grid-column: 1/-1;">
-                    <h3>⚔️ 联盟攻击队效果</h3>
+                    <h3>⚔️ 聯盟攻击队效果</h3>
                     <div class="union-raider-info" id="unionRaiderInfo">
-                        <div class="union-loading">加载中...</div>
+                        <div class="union-loading">載入中...</div>
                     </div>
                 </div>
 
-                <!-- 联盟拼图 -->
+                <!-- 聯盟拼图 -->
                 <div class="stat-section" style="grid-column: 1/-1;">
-                    <h3>🧩 联盟占领区域</h3>
+                    <h3>🧩 聯盟占领區域</h3>
                     <div class="union-puzzle-container" id="unionPuzzleContainer">
-                        <div class="union-loading">加载中...</div>
+                        <div class="union-loading">載入中...</div>
                     </div>
                 </div>
             </div>
@@ -1473,24 +1473,24 @@
     </div>
 </div>
         </div>
-        <!-- 角色查询区域结束 -->
+        <!-- 角色查詢區域结束 -->
 
-        <!-- 排行榜区域 - 暂时隐藏（台服API未开放排行榜功能） -->
+        <!-- 排行榜區域 - 暂时隐藏（台服API未开放排行榜功能） -->
         <!--
         <div id="ranking-section" class="ranking-section">
             <div class="ranking-box">
-                <h2 style="margin-bottom: 20px; color: #ffcd56;">🏆 战斗力排行榜</h2>
+                <h2 style="margin-bottom: 20px; color: #ffcd56;">🏆 戰鬥力排行榜</h2>
                 <div class="ranking-filters">
                     <div class="filter-group">
-                        <span class="filter-label">🌐 服务器</span>
+                        <span class="filter-label">🌐 伺服器</span>
                         <select id="rankingWorld" class="filter-select">
-                            <option value="">全部服务器</option>
+                            <option value="">全部伺服器</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <span class="filter-label">⚔️ 职业</span>
+                        <span class="filter-label">⚔️ 職業</span>
                         <select id="rankingClass" class="filter-select">
-                            <option value="">全部职业</option>
+                            <option value="">全部職業</option>
                         </select>
                     </div>
                     <div class="filter-group" style="margin-left: auto;">
@@ -1499,7 +1499,7 @@
                     </div>
                 </div>
                 <div class="ranking-list" id="rankingList">
-                    <div class="ranking-empty">👆 选择筛选条件后点击查询</div>
+                    <div class="ranking-empty">👆 選擇筛选條件后点击查询</div>
                 </div>
                 <div class="ranking-pagination" id="rankingPagination" style="display: none;">
                     <button class="page-btn" id="prevPageBtn" onclick="loadRanking(currentRankPage - 1)">◀ 上一页</button>
@@ -1512,7 +1512,7 @@
 
         <!-- 页脚 -->
         <div class="footer">
-            <p>数据来源：<a href="https://openapi.nexon.com" target="_blank">Nexon Open API</a></p>
+            <p>資料来源：<a href="https://openapi.nexon.com" target="_blank">Nexon Open API</a></p>
             <p>Created with ❤️ by memU bot</p>
         </div>
     </div>
@@ -1526,13 +1526,13 @@
         let currentRankPage = 1;
         let rankingCache = {};
 
-        // API请求队列控制（避免限流）
+        // API請求队列控制（避免限流）
         let lastApiCallTime = 0;
-        const API_CALL_INTERVAL = 300; // 每次API调用间隔300ms
+        const API_CALL_INTERVAL = 300; // 每次API調用间隔300ms
         
-        // API请求函数
+        // API請求函数
         async function apiRequest(endpoint, params = {}) {
-            // 控制请求频率，避免OPENAPI00007错误
+            // 控制請求频率，避免OPENAPI00007錯誤
             const now = Date.now();
             const timeSinceLastCall = now - lastApiCallTime;
             if (timeSinceLastCall < API_CALL_INTERVAL) {
@@ -1561,18 +1561,18 @@
             return num.toLocaleString();
         }
 
-        // 获取属性值
+        // 獲取属性值
         function getStatValue(stats, name) {
             const stat = stats.find(s => s.stat_name === name);
             return stat ? stat.stat_value : '0';
         }
 
-        // 显示/隐藏元素
+        // 顯示/隐藏元素
         function showElement(id, show) {
             document.getElementById(id).classList.toggle('show', show);
         }
 
-        // 显示错误
+        // 顯示錯誤
         function showError(msg) {
             document.getElementById('errorMsg').textContent = msg;
             showElement('error', true);
@@ -1580,31 +1580,31 @@
             showElement('result', false);
         }
 
-        // 搜索角色
+        // 搜尋角色
         async function searchCharacter(event) {
             event.preventDefault();
 
             const name = document.getElementById('characterName').value.trim();
             if (!name) {
-                showError('请输入角色名称');
+                showError('請輸入角色名称');
                 return;
             }
 
-            // 显示加载
+            // 顯示載入
             showElement('loading', true);
             showElement('error', false);
             showElement('result', false);
             document.getElementById('searchBtn').disabled = true;
 
             try {
-                // 1. 获取OCID
+                // 1. 獲取OCID
                 const idResult = await apiRequest('/id', { character_name: name });
                 
                 if (idResult.error) {
                     if (idResult.error.name === 'OPENAPI00005') {
-                        showError('❌ API Key已过期，请联系管理员更新');
+                        showError('❌ API Key已过期，請联系管理员更新');
                     } else if (idResult.error.name === 'OPENAPI00004') {
-                        showError('❌ 找不到该角色，请检查名称是否正确（需使用繁体中文）');
+                        showError('❌ 找不到该角色，請检查名称是否正确（需使用繁体中文）');
                     } else {
                         showError('❌ ' + idResult.error.message);
                     }
@@ -1614,41 +1614,41 @@
                 const ocid = idResult.ocid;
                 currentOcid = ocid;
 
-                // 2. 获取基本信息和属性
+                // 2. 獲取基本資訊和属性
                 const [basicResult, statResult] = await Promise.all([
                     apiRequest('/character/basic', { ocid }),
                     apiRequest('/character/stat', { ocid })
                 ]);
 
                 if (basicResult.error) {
-                    showError('❌ 获取角色信息失败: ' + basicResult.error.message);
+                    showError('❌ 獲取角色資訊失败: ' + basicResult.error.message);
                     return;
                 }
 
-                // 3. 显示结果
+                // 3. 顯示结果
                 displayResult(basicResult, statResult);
                 
-                // 重置所有懒加载数据
-                document.getElementById('equipGrid').innerHTML = '<div class="no-equip">👆 点击"装备"选项卡加载装备数据</div>';
+                // 重置所有懒載入資料
+                document.getElementById('equipGrid').innerHTML = '<div class="no-equip">👆 点击"裝備"選項卡載入裝備資料</div>';
                 document.getElementById('equipGrid').dataset.loaded = 'false';
-                document.getElementById('symbolGrid').innerHTML = '<div class="no-equip">👆 点击"符文"选项卡加载数据</div>';
+                document.getElementById('symbolGrid').innerHTML = '<div class="no-equip">👆 点击"符文"選項卡載入資料</div>';
                 document.getElementById('symbolGrid').dataset.loaded = 'false';
-                document.getElementById('skillGrid').innerHTML = '<div class="no-equip">👆 点击"技能"选项卡加载数据</div>';
+                document.getElementById('skillGrid').innerHTML = '<div class="no-equip">👆 点击"技能"選項卡載入資料</div>';
                 document.getElementById('skillGrid').dataset.loaded = 'false';
                 currentOcid = ocid;
                 
-                // 4. 加载内在能力
+                // 4. 載入内在能力
                 loadAbility(ocid);
 
             } catch (e) {
-                showError('❌ 请求失败: ' + e.message);
+                showError('❌ 請求失敗: ' + e.message);
             } finally {
                 document.getElementById('searchBtn').disabled = false;
                 showElement('loading', false);
             }
         }
 
-        // 台服服务器颜色映射
+        // 台服伺服器颜色映射
         const serverColors = {
             '艾麗亞': { bg: 'linear-gradient(135deg, #ff6b6b, #ff8e8e)', letter: 'A' },
             '普力特': { bg: 'linear-gradient(135deg, #4ecdc4, #44a08d)', letter: 'P' },
@@ -1662,15 +1662,15 @@
             '瑞普': { bg: 'linear-gradient(135deg, #a18cd1, #fbc2eb)', letter: 'R' }
         };
 
-        // 显示结果
+        // 顯示结果
         function displayResult(basic, stat) {
-            // 基本信息
+            // 基本資訊
             document.getElementById('charImage').src = basic.character_image || '';
             document.getElementById('charName').textContent = basic.character_name;
             document.getElementById('charLevel').textContent = 'Lv.' + basic.character_level;
             document.getElementById('charClass').textContent = basic.character_class;
             
-            // 服务器 - 使用自定义图标
+            // 伺服器 - 使用自定义圖標
             const worldName = basic.world_name || '未知';
             const serverInfo = serverColors[worldName] || { bg: 'linear-gradient(135deg, #6c757d, #495057)', letter: worldName.charAt(0) };
             const serverIcon = document.getElementById('serverIcon');
@@ -1681,12 +1681,12 @@
             // 公会
             document.getElementById('guildName').textContent = basic.character_guild_name || '无公会';
             
-            // 经验进度条
+            // 經驗進度條
             const expRate = parseFloat(basic.character_exp_rate) || 0;
             document.getElementById('expPercent').textContent = expRate.toFixed(3) + '%';
             document.getElementById('expBarFill').style.width = expRate + '%';
             
-            // 重置预设选择和缓存
+            // 重置預設選擇和缓存
             currentPreset = 1;
             cachedEquipmentData = null;
             document.querySelectorAll('.preset-btn').forEach((btn, idx) => {
@@ -1697,12 +1697,12 @@
             if (stat && stat.final_stat) {
                 const stats = stat.final_stat;
 
-                // 当前战斗力
+                // 當前戰鬥力
                 const cp = getStatValue(stats, '戰鬥力');
                 const currentCP = parseInt(cp) || 0;
                 document.getElementById('combatPower').textContent = formatNumber(currentCP);
                 
-                // 异步获取5天历史最高战力
+                // 異步獲取5天歷史最高战力
                 loadHistoryCombatPower(currentOcid, currentCP);
 
                 // 战斗属性
@@ -1739,30 +1739,30 @@
             showElement('result', true);
         }
 
-        // 回车搜索
+        // 回车搜尋
         document.getElementById('characterName').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchCharacter(e);
             }
         });
 
-        // 存储装备数据用于预设切换
+        // 存储裝備資料用于預設切换
         let cachedEquipmentData = null;
         
-        // 存储内在能力数据
+        // 存储内在能力資料
         let cachedAbilityData = null;
         let currentAbilityPreset = 1;
         
-        // 加载内在能力（延迟加载避免API限流）
+        // 載入内在能力（延迟載入避免API限流）
         async function loadAbility(ocid) {
             const listEl = document.getElementById('abilityList');
             if (!listEl) {
                 console.error('abilityList element not found');
                 return;
             }
-            listEl.innerHTML = '<div class="ability-loading">加载中...</div>';
+            listEl.innerHTML = '<div class="ability-loading">載入中...</div>';
             
-            // 重置预设按钮状态
+            // 重置預設按钮状态
             currentAbilityPreset = 1;
             document.querySelectorAll('.ability-preset-btn').forEach((btn, idx) => {
                 btn.classList.toggle('active', idx === 0);
@@ -1775,23 +1775,23 @@
                 const result = await apiRequest('/character/ability', { ocid });
                 console.log('🌟 Ability API response:', result);
                 
-                // 检查是否有错误
+                // 检查是否有錯誤
                 if (result.error) {
                     console.error('Ability API error:', result.error);
-                    // 如果是限流错误，提示用户稍后重试
+                    // 如果是限流錯誤，提示用户稍后重试
                     if (result.error.name === 'OPENAPI00007') {
-                        listEl.innerHTML = '<div class="ability-empty">⏳ 请求过快，请稍后刷新页面重试</div>';
+                        listEl.innerHTML = '<div class="ability-empty">⏳ 請求过快，請稍后重新整理頁面重试</div>';
                     } else {
-                        listEl.innerHTML = '<div class="ability-empty">API错误: ' + (result.error.message || '未知错误') + '</div>';
+                        listEl.innerHTML = '<div class="ability-empty">API錯誤: ' + (result.error.message || '未知錯誤') + '</div>';
                     }
                     return;
                 }
                 
-                // 检查是否有数据
+                // 检查是否有資料
                 const hasData = result.ability_info || result.ability_preset_1;
                 
                 if (!hasData) {
-                    listEl.innerHTML = '<div class="ability-empty">无内在能力数据</div>';
+                    listEl.innerHTML = '<div class="ability-empty">无内在能力資料</div>';
                     return;
                 }
                 
@@ -1800,11 +1800,11 @@
                 
             } catch (e) {
                 console.error('Load ability error:', e);
-                listEl.innerHTML = '<div class="ability-empty">加载失败: ' + e.message + '</div>';
+                listEl.innerHTML = '<div class="ability-empty">載入失败: ' + e.message + '</div>';
             }
         }
         
-        // 切换内在能力预设
+        // 切换内在能力預設
         function changeAbilityPreset(presetNo) {
             if (!cachedAbilityData || presetNo === currentAbilityPreset) return;
             
@@ -1818,11 +1818,11 @@
             displayAbility(cachedAbilityData, presetNo);
         }
         
-        // 显示内在能力
+        // 顯示内在能力
         function displayAbility(data, presetNo) {
             const listEl = document.getElementById('abilityList');
             
-            // 获取对应预设的能力
+            // 獲取对应預設的能力
             let abilities = [];
             let presetGrade = '';
             
@@ -1844,7 +1844,7 @@
             }
             
             if (!abilities || abilities.length === 0) {
-                listEl.innerHTML = '<div class="ability-empty">此预设无内在能力数据</div>';
+                listEl.innerHTML = '<div class="ability-empty">此預設无内在能力資料</div>';
                 return;
             }
             
@@ -1877,12 +1877,12 @@
             listEl.innerHTML = html;
         }
 
-        // 获取5天历史最高战力
+        // 獲取5天歷史最高战力
         async function loadHistoryCombatPower(ocid, currentCP) {
             const maxCPElement = document.getElementById('maxCombatPower');
             const maxDateElement = document.getElementById('maxCombatPowerDate');
             
-            // 先显示当前战力作为初始值
+            // 先顯示當前战力作为初始值
             maxCPElement.textContent = formatNumber(currentCP);
             maxDateElement.textContent = '今日';
             
@@ -1890,7 +1890,7 @@
                 const today = new Date();
                 const dates = [];
                 
-                // 生成过去5天的日期 (API 数据有延迟，从昨天开始)
+                // 生成过去5天的日期 (API 資料有延迟，从昨天开始)
                 for (let i = 1; i <= 5; i++) {
                     const d = new Date(today);
                     d.setDate(d.getDate() - i);
@@ -1900,7 +1900,7 @@
                 let maxCP = currentCP;
                 let maxDate = '今日';
                 
-                // 并行请求5天的数据
+                // 並行請求5天的資料
                 const requests = dates.map(date => 
                     apiRequest('/character/stat', { ocid, date }).catch(() => null)
                 );
@@ -1917,33 +1917,33 @@
                     }
                 });
                 
-                // 更新显示
+                // 更新顯示
                 maxCPElement.textContent = formatNumber(maxCP);
                 
                 if (maxDate === '今日') {
                     maxDateElement.textContent = '今日';
                 } else {
-                    // 格式化日期显示
+                    // 格式化日期顯示
                     const d = new Date(maxDate);
                     maxDateElement.textContent = `${d.getMonth() + 1}/${d.getDate()}`;
                 }
                 
-                // 如果历史最高比当前高，添加特殊样式
+                // 如果歷史最高比當前高，添加特殊样式
                 if (maxCP > currentCP) {
                     maxCPElement.style.color = '#ff6b6b';
-                    maxCPElement.title = `比当前高 ${formatNumber(maxCP - currentCP)}`;
+                    maxCPElement.title = `比當前高 ${formatNumber(maxCP - currentCP)}`;
                 } else {
                     maxCPElement.style.color = '#43e97b';
                 }
                 
             } catch (e) {
-                console.error('获取历史战力失败:', e);
+                console.error('獲取歷史战力失败:', e);
                 maxCPElement.textContent = formatNumber(currentCP);
                 maxDateElement.textContent = '今日';
             }
         }
         
-        // 切换预设
+        // 切换預設
         async function changePreset(presetNo) {
             console.log('🔄 changePreset called:', presetNo, '| currentPreset:', currentPreset, '| currentOcid:', currentOcid);
             
@@ -1966,7 +1966,7 @@
             
             console.log('📦 cachedEquipmentData:', cachedEquipmentData ? 'exists' : 'null');
             
-            // 如果没有缓存数据，先加载
+            // 如果沒有缓存資料，先載入
             if (!cachedEquipmentData) {
                 console.log('⏳ Loading equipment data...');
                 try {
@@ -1978,14 +1978,14 @@
                 }
             }
             
-            // 切换显示
+            // 切换顯示
             displayEquipmentByPreset(cachedEquipmentData, presetNo);
             console.log('✅ Preset switched to:', presetNo);
         }
 
 
 
-        // 选项卡切换
+        // 選項卡切换
         function switchTab(tabName) {
             console.log('🔘 Tab:', tabName, '| currentOcid:', currentOcid);
             
@@ -2004,7 +2004,7 @@
             // 切换内容
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            // 懒加载数据
+            // 懒載入資料
             if (tabName === 'equip' && currentOcid) {
                 console.log('⚔️ Loading equipment...');
                 loadEquipment(currentOcid);
@@ -2023,22 +2023,22 @@
             }
         }
         
-        // 联盟数据缓存
+        // 聯盟資料缓存
         let cachedUnionData = null;
         
-        // 加载联盟数据
+        // 載入聯盟資料
         async function loadUnion(ocid) {
-            // 检查是否已加载
+            // 检查是否已載入
             const levelInfo = document.getElementById('unionLevelInfo');
             if (levelInfo.dataset && levelInfo.dataset.loaded === 'true') return;
             
-            levelInfo.innerHTML = '<div class="union-loading">加载中...</div>';
-            document.getElementById('unionArtifactInfo').innerHTML = '<div class="union-loading">加载中...</div>';
-            document.getElementById('unionChampionInfo').innerHTML = '<div class="union-loading">加载中...</div>';
-            document.getElementById('unionRaiderInfo').innerHTML = '<div class="union-loading">加载中...</div>';
+            levelInfo.innerHTML = '<div class="union-loading">載入中...</div>';
+            document.getElementById('unionArtifactInfo').innerHTML = '<div class="union-loading">載入中...</div>';
+            document.getElementById('unionChampionInfo').innerHTML = '<div class="union-loading">載入中...</div>';
+            document.getElementById('unionRaiderInfo').innerHTML = '<div class="union-loading">載入中...</div>';
             
             try {
-                // 并行加载所有联盟数据
+                // 並行載入所有聯盟資料
                 const [unionBasic, unionRaider, unionArtifact, unionChampion] = await Promise.all([
                     apiRequest('/user/union', { ocid }),
                     apiRequest('/user/union-raider', { ocid }),
@@ -2051,32 +2051,32 @@
                 console.log('🔱 Union Artifact:', unionArtifact);
                 console.log('👑 Union Champion:', unionChampion);
                 
-                // 显示联盟等级
+                // 顯示聯盟等级
                 displayUnionLevel(unionBasic);
                 
-                // 显示联盟神器
+                // 顯示聯盟神器
                 displayUnionArtifact(unionArtifact);
                 
-                // 显示冠军联盟
+                // 顯示冠军聯盟
                 displayUnionChampion(unionChampion);
                 
-                // 显示联盟攻击队
+                // 顯示聯盟攻击队
                 displayUnionRaider(unionRaider);
                 
                 levelInfo.dataset.loaded = 'true';
                 
             } catch (e) {
                 console.error('Load union error:', e);
-                levelInfo.innerHTML = '<div class="union-loading">加载失败</div>';
+                levelInfo.innerHTML = '<div class="union-loading">載入失败</div>';
             }
         }
         
-        // 显示联盟等级
+        // 顯示聯盟等级
         function displayUnionLevel(data) {
             const container = document.getElementById('unionLevelInfo');
             
             if (data.error || !data.union_level) {
-                container.innerHTML = '<div class="union-loading">无联盟数据</div>';
+                container.innerHTML = '<div class="union-loading">无聯盟資料</div>';
                 return;
             }
             
@@ -2091,7 +2091,7 @@
                         <span class="stat-value">Lv. ${data.union_artifact_level || 0}</span>
                     </div>
                     <div class="stat-row">
-                        <span class="stat-name">神器经验</span>
+                        <span class="stat-name">神器經驗</span>
                         <span class="stat-value">${formatNumber(data.union_artifact_exp || 0)}</span>
                     </div>
                     <div class="stat-row">
@@ -2102,12 +2102,12 @@
             `;
         }
         
-        // 显示联盟神器
+        // 顯示聯盟神器
         function displayUnionArtifact(data) {
             const container = document.getElementById('unionArtifactInfo');
             
             if (data.error || !data.union_artifact_effect) {
-                container.innerHTML = '<div class="union-loading">无神器数据</div>';
+                container.innerHTML = '<div class="union-loading">无神器資料</div>';
                 return;
             }
             
@@ -2131,12 +2131,12 @@
             container.innerHTML = html;
         }
         
-        // 显示冠军联盟
+        // 顯示冠军聯盟
         function displayUnionChampion(data) {
             const container = document.getElementById('unionChampionInfo');
             
             if (data.error || !data.union_champion || data.union_champion.length === 0) {
-                container.innerHTML = '<div class="union-loading">无冠军联盟数据</div>';
+                container.innerHTML = '<div class="union-loading">无冠军聯盟資料</div>';
                 return;
             }
             
@@ -2186,22 +2186,22 @@
             
             container.innerHTML = html;
             
-            // 异步加载冠军角色头像
+            // 異步載入冠军角色頭像
             loadChampionAvatars(data.union_champion);
         }
         
-        // 加载冠军角色头像
+        // 載入冠军角色頭像
         async function loadChampionAvatars(champions) {
             for (let idx = 0; idx < champions.length; idx++) {
                 const champion = champions[idx];
                 if (!champion.champion_name) continue;
                 
                 try {
-                    // 获取角色OCID
+                    // 獲取角色OCID
                     const idResult = await apiRequest('/id', { character_name: champion.champion_name });
                     if (!idResult.ocid) continue;
                     
-                    // 获取角色基本信息（含头像）
+                    // 獲取角色基本資訊（含頭像）
                     const basicResult = await apiRequest('/character/basic', { ocid: idResult.ocid });
                     if (basicResult.character_image) {
                         const avatarEl = document.getElementById(`champion-avatar-${idx}`);
@@ -2220,12 +2220,12 @@
             }
         }
         
-        // 显示联盟攻击队
+        // 顯示聯盟攻击队
         function displayUnionRaider(data) {
             const container = document.getElementById('unionRaiderInfo');
             
             if (data.error || (!data.union_raider_stat && !data.union_occupied_stat)) {
-                container.innerHTML = '<div class="union-loading">无攻击队数据</div>';
+                container.innerHTML = '<div class="union-loading">无攻击队資料</div>';
                 return;
             }
             
@@ -2244,7 +2244,7 @@
             if (data.union_occupied_stat && data.union_occupied_stat.length > 0) {
                 html += `
                     <div class="union-occupied-stats">
-                        <h4>🗺️ 占领区域效果</h4>
+                        <h4>🗺️ 占领區域效果</h4>
                         <div class="union-raider-stats">
                 `;
                 data.union_occupied_stat.forEach(stat => {
@@ -2253,30 +2253,30 @@
                 html += '</div></div>';
             }
             
-            container.innerHTML = html || '<div class="union-loading">无攻击队数据</div>';
+            container.innerHTML = html || '<div class="union-loading">无攻击队資料</div>';
             
-            // 显示联盟拼图
+            // 顯示聯盟拼图
             displayUnionPuzzle(data);
         }
         
-        // 显示联盟拼图
+        // 顯示聯盟拼图
         function displayUnionPuzzle(data) {
             const container = document.getElementById('unionPuzzleContainer');
             
             if (!data.union_block || data.union_block.length === 0) {
-                container.innerHTML = '<div class="union-loading">无拼图数据</div>';
+                container.innerHTML = '<div class="union-loading">无拼图資料</div>';
                 return;
             }
             
-            // 创建22x20的网格 (x: -11到10, y: -9到10)
+            // 創建22x20的網格 (x: -11到10, y: -9到10)
             const minX = -11, maxX = 10, minY = -9, maxY = 10;
             const width = maxX - minX + 1;
             const height = maxY - minY + 1;
             
-            // 初始化网格
+            // 初始化網格
             const grid = {};
             
-            // 职业类型映射
+            // 職業類型映射
             const typeMap = {
                 '戰士': 'warrior', '劍士': 'warrior',
                 '法師': 'mage',
@@ -2286,7 +2286,7 @@
                 'hybrid': 'hybrid'
             };
             
-            // 填充占领区域
+            // 填充占领區域
             data.union_block.forEach(block => {
                 const blockType = typeMap[block.block_type] || 'hybrid';
                 if (block.block_position) {
@@ -2337,27 +2337,27 @@
             container.innerHTML = html;
         }
 
-        // 加载装备
+        // 載入裝備
         async function loadEquipment(ocid) {
             if (document.getElementById('equipGrid').dataset.loaded === 'true') return;
             try {
                 const result = await apiRequest('/character/item-equipment', { ocid });
-                cachedEquipmentData = result; // 缓存装备数据
+                cachedEquipmentData = result; // 缓存裝備資料
                 displayEquipmentByPreset(result, currentPreset);
                 document.getElementById('equipGrid').dataset.loaded = 'true';
             } catch (e) {
-                document.getElementById('equipGrid').innerHTML = '<div class="no-equip">加载失败</div>';
+                document.getElementById('equipGrid').innerHTML = '<div class="no-equip">載入失败</div>';
             }
         }
 
-        // 根据预设显示装备
+        // 根据預設顯示裝備
         function displayEquipmentByPreset(data, presetNo) {
             console.log('📋 displayEquipmentByPreset called, presetNo:', presetNo);
             console.log('📋 Available keys:', Object.keys(data));
             
             const grid = document.getElementById('equipGrid');
             
-            // 选择对应预设的装备数据
+            // 選擇对应預設的裝備資料
             let equipment;
             if (presetNo === 1) {
                 equipment = data.item_equipment_preset_1 || data.item_equipment || [];
@@ -2374,7 +2374,7 @@
             }
             
             if (!equipment || equipment.length === 0) {
-                grid.innerHTML = '<div class="no-equip">该预设暂无装备数据</div>';
+                grid.innerHTML = '<div class="no-equip">该預設暫無裝備資料</div>';
                 return;
             }
             
@@ -2402,7 +2402,7 @@
             `).join('');
         }
 
-        // 加载符文
+        // 載入符文
         async function loadSymbol(ocid) {
             if (document.getElementById('symbolGrid').dataset.loaded === 'true') return;
             try {
@@ -2410,21 +2410,21 @@
                 displaySymbol(result);
                 document.getElementById('symbolGrid').dataset.loaded = 'true';
             } catch (e) {
-                document.getElementById('symbolGrid').innerHTML = '<div class="no-equip">加载失败</div>';
+                document.getElementById('symbolGrid').innerHTML = '<div class="no-equip">載入失败</div>';
             }
         }
 
-        // 显示符文
+        // 顯示符文
         function displaySymbol(data) {
             const grid = document.getElementById('symbolGrid');
             // API 返回的是 data.symbol 而不是 data.symbol_equipment
             const symbols = data.symbol || [];
             if (symbols.length === 0) {
-                grid.innerHTML = '<div class="no-equip">暂无符文数据</div>';
+                grid.innerHTML = '<div class="no-equip">暫無符文資料</div>';
                 return;
             }
             
-            // 获取符文增加的属性
+            // 獲取符文增加的属性
             function getSymbolStats(sym) {
                 const stats = [];
                 // 四维属性
@@ -2436,11 +2436,11 @@
                 // 特殊属性（豪华符文）
                 if (sym.symbol_drop_rate && sym.symbol_drop_rate !== '0%') stats.push(`<span style="color:#ffcd56;">掉宝率 +${sym.symbol_drop_rate}</span>`);
                 if (sym.symbol_meso_rate && sym.symbol_meso_rate !== '0%') stats.push(`<span style="color:#ffd700;">金币 +${sym.symbol_meso_rate}</span>`);
-                if (sym.symbol_exp_rate && sym.symbol_exp_rate !== '0%') stats.push(`<span style="color:#00f2fe;">经验 +${sym.symbol_exp_rate}</span>`);
+                if (sym.symbol_exp_rate && sym.symbol_exp_rate !== '0%') stats.push(`<span style="color:#00f2fe;">經驗 +${sym.symbol_exp_rate}</span>`);
                 return stats.join('<br>');
             }
             
-            // 判断符文类型（神秘/真实/豪华）
+            // 判断符文類型（神秘/真实/豪华）
             function getSymbolType(name) {
                 if (name.includes('豪華')) return { type: '豪华真实符文', color: '#ffd700', forceType: '真实之力' };
                 if (name.includes('真實')) return { type: '真实符文', color: '#56c5ff', forceType: '真实之力' };
@@ -2465,11 +2465,11 @@
             `}).join('');
         }
 
-        // 加载技能
+        // 載入技能
         async function loadSkill(ocid) {
             if (document.getElementById('skillGrid').dataset.loaded === 'true') return;
             try {
-                // 同时获取 V矩阵、HEXA核心、以及技能图标（5转和6转技能）
+                // 同时獲取 V矩阵、HEXA核心、以及技能圖標（5转和6转技能）
                 const [vmatrix, hexamatrix, skill5, skill6] = await Promise.all([
                     apiRequest('/character/vmatrix', { ocid }),
                     apiRequest('/character/hexamatrix', { ocid }),
@@ -2477,7 +2477,7 @@
                     apiRequest('/character/skill', { ocid, character_skill_grade: '6' })
                 ]);
                 
-                // 建立技能名称到图标的映射
+                // 建立技能名称到圖標的映射
                 const skillIconMap = {};
                 const allSkills = [...(skill5.character_skill || []), ...(skill6.character_skill || [])];
                 allSkills.forEach(skill => {
@@ -2494,16 +2494,16 @@
                 displaySkill(vmatrix, hexamatrix, skillIconMap);
                 document.getElementById('skillGrid').dataset.loaded = 'true';
             } catch (e) {
-                document.getElementById('skillGrid').innerHTML = '<div class="no-equip">加载失败: ' + e.message + '</div>';
+                document.getElementById('skillGrid').innerHTML = '<div class="no-equip">載入失败: ' + e.message + '</div>';
             }
         }
 
-        // 显示技能
+        // 顯示技能
         function displaySkill(vmatrix, hexamatrix, skillIconMap) {
             const grid = document.getElementById('skillGrid');
             let html = '';
             
-            // 根据技能名查找图标
+            // 根据技能名查找圖標
             function findIcon(skillName) {
                 if (!skillName) return '';
                 // 直接匹配
@@ -2517,12 +2517,12 @@
                 return '';
             }
             
-            // HEXA核心 (6转) - 优先显示
+            // HEXA核心 (6转) - 优先顯示
             const hexaCores = hexamatrix && hexamatrix.character_hexa_core_equipment || [];
             if (hexaCores.length > 0) {
                 html += `<div style="grid-column: 1/-1; font-weight: bold; color: #56c5ff; margin: 10px 0; font-size: 1.1em;">🔷 HEXA核心 (${hexaCores.length})</div>`;
                 html += hexaCores.map(hex => {
-                    // 尝试从关联技能获取图标
+                    // 尝试从关联技能獲取圖標
                     let iconUrl = '';
                     if (hex.linked_skill && hex.linked_skill.length > 0) {
                         for (const ls of hex.linked_skill) {
@@ -2558,7 +2558,7 @@
             if (validVCores.length > 0) {
                 html += `<div style="grid-column: 1/-1; font-weight: bold; color: #ff9a56; margin: 20px 0 10px; font-size: 1.1em;">🔶 V矩陣 (${validVCores.length})</div>`;
                 html += validVCores.map(v => {
-                    // 查找图标 - 优先使用技能1的名称
+                    // 查找圖標 - 优先使用技能1的名称
                     let iconUrl = findIcon(v.v_core_skill_1) || findIcon(v.v_core_name);
                     
                     const typeColor = v.v_core_type === '技能核心' ? '#ff6b6b' : 
@@ -2580,32 +2580,32 @@
             }
             
             if (!html) {
-                html = '<div class="no-equip">暂无技能数据</div>';
+                html = '<div class="no-equip">暫無技能資料</div>';
             }
             grid.innerHTML = html;
         }
 
         // ==================== 排行榜功能 ====================
         
-        // 初始化职业下拉列表
+        // 初始化職業下拉列表
         function initClassSelect() {
             const select = document.getElementById('rankingClass');
             if (!select) return;
             
-            // 检查是否已加载外部职业数据
+            // 检查是否已載入外部職業資料
             if (typeof TW_CLASS_DATA !== 'undefined') {
                 populateClassSelect(TW_CLASS_DATA);
             } else {
-                // 如果外部文件加载失败，使用手动输入
-                select.innerHTML = '<option value="">全部职业</option><option value="_manual">-- 手动输入职业名 --</option>';
+                // 如果外部文件載入失败，使用手动輸入
+                select.innerHTML = '<option value="">全部職業</option><option value="_manual">-- 手动輸入職業名 --</option>';
                 setupManualInput(select);
             }
         }
         
-        // 填充职业下拉列表
+        // 填充職業下拉列表
         function populateClassSelect(classGroups) {
             const select = document.getElementById('rankingClass');
-            select.innerHTML = '<option value="">全部职业</option>';
+            select.innerHTML = '<option value="">全部職業</option>';
             
             classGroups.forEach(([groupName, classes]) => {
                 const optgroup = document.createElement('optgroup');
@@ -2621,20 +2621,20 @@
                 select.appendChild(optgroup);
             });
             
-            // 添加手动输入选项
+            // 添加手动輸入选项
             const manualOption = document.createElement('option');
             manualOption.value = '_manual';
-            manualOption.textContent = '-- 手动输入其他职业 --';
+            manualOption.textContent = '-- 手动輸入其他職業 --';
             select.appendChild(manualOption);
             
             setupManualInput(select);
         }
         
-        // 设置手动输入功能
+        // 設定手动輸入功能
         function setupManualInput(select) {
             select.addEventListener('change', function() {
                 if (this.value === '_manual') {
-                    const className = prompt('请输入职业名称（繁体中文）：');
+                    const className = prompt('請輸入職業名称（繁体中文）：');
                     if (className && className.trim()) {
                         const option = document.createElement('option');
                         option.value = className.trim();
@@ -2648,10 +2648,10 @@
             });
         }
         
-        // 页面加载完成后初始化
+        // 頁面載入完成后初始化
         document.addEventListener('DOMContentLoaded', initClassSelect);
         
-        // 切换主页面
+        // 切换主頁面
         function switchMainTab(tabName) {
             const navTabs = document.querySelectorAll('.nav-tab');
             navTabs.forEach((tab, idx) => {
@@ -2662,19 +2662,19 @@
             document.getElementById('ranking-section').classList.toggle('show', tabName === 'ranking');
         }
         
-        // 加载排行榜
+        // 載入排行榜
         async function loadRanking(page = 1) {
             const world = document.getElementById('rankingWorld').value;
             const classFilter = document.getElementById('rankingClass').value;
             const listEl = document.getElementById('rankingList');
             const paginationEl = document.getElementById('rankingPagination');
             
-            // 显示加载
-            listEl.innerHTML = '<div class="ranking-loading"><div class="spinner"></div><p>正在加载排行榜...</p></div>';
+            // 顯示載入
+            listEl.innerHTML = '<div class="ranking-loading"><div class="spinner"></div><p>正在載入排行榜...</p></div>';
             paginationEl.style.display = 'none';
             
             try {
-                // 构建请求参数
+                // 構建請求參數
                 const params = {};
                 if (world) params.world_name = world;
                 if (classFilter) params.character_class = classFilter;
@@ -2682,15 +2682,15 @@
                 
                 console.log('🏆 Ranking params:', params);
                 
-                // 调用排行榜API
+                // 調用排行榜API
                 const result = await apiRequest('/ranking/overall', params);
                 
                 console.log('📊 Ranking result:', result);
                 
                 if (result.error) {
-                    let errorMsg = result.error.message || '加载失败';
+                    let errorMsg = result.error.message || '載入失败';
                     if (result.error.name === 'OPENAPI00003' || errorMsg.includes('Access denied')) {
-                        errorMsg = '⚠️ API Key 没有排行榜权限\n\n请到 Nexon Open API 网站申请「排行榜」API 权限';
+                        errorMsg = '⚠️ API Key 沒有排行榜权限\n\n請到 Nexon Open API 网站申請「排行榜」API 权限';
                     }
                     listEl.innerHTML = `<div class="ranking-empty" style="white-space: pre-line;">❌ ${errorMsg}</div>`;
                     return;
@@ -2699,40 +2699,40 @@
                 const rankings = result.ranking || [];
                 
                 if (rankings.length === 0) {
-                    listEl.innerHTML = '<div class="ranking-empty">📭 没有找到符合条件的角色</div>';
+                    listEl.innerHTML = '<div class="ranking-empty">📭 沒有找到符合條件的角色</div>';
                     return;
                 }
                 
                 currentRankPage = page;
                 
-                // 先显示基本排行榜（按等级排序的官方数据）
+                // 先顯示基本排行榜（按等级排序的官方資料）
                 displayRankingList(rankings, page, listEl);
                 
-                // 显示分页
+                // 顯示分页
                 paginationEl.style.display = 'flex';
                 document.getElementById('prevPageBtn').disabled = page <= 1;
                 document.getElementById('pageInfo').textContent = `第 ${page} 页`;
                 document.getElementById('nextPageBtn').disabled = rankings.length < 10;
                 
-                // 异步加载每个角色的战斗力和头像
+                // 異步載入每个角色的戰鬥力和頭像
                 loadRankingDetails(rankings);
                 
             } catch (e) {
                 console.error('Ranking error:', e);
-                listEl.innerHTML = `<div class="ranking-empty">❌ 请求失败: ${e.message}</div>`;
+                listEl.innerHTML = `<div class="ranking-empty">❌ 請求失敗: ${e.message}</div>`;
             }
         }
         
-        // 显示排行榜列表
+        // 顯示排行榜列表
         function displayRankingList(rankings, page, listEl) {
             let html = `
                 <div class="ranking-header">
                     <div>排名</div>
-                    <div>头像</div>
+                    <div>頭像</div>
                     <div>角色</div>
-                    <div>服务器</div>
+                    <div>伺服器</div>
                     <div>等级</div>
-                    <div>战斗力</div>
+                    <div>戰鬥力</div>
                 </div>
             `;
             
@@ -2758,7 +2758,7 @@
                         </div>
                         <div style="font-weight: bold; color: #ffcd56;">Lv.${char.character_level || 0}</div>
                         <div class="rank-power" id="rank-power-${idx}">
-                            <span style="color:#888;font-size:0.9em;">加载中...</span>
+                            <span style="color:#888;font-size:0.9em;">載入中...</span>
                         </div>
                     </div>
                 `;
@@ -2767,25 +2767,25 @@
             listEl.innerHTML = html;
         }
         
-        // 异步加载角色详情（头像和战斗力）
+        // 異步載入角色詳情（頭像和戰鬥力）
         async function loadRankingDetails(rankings) {
-            // 并行加载所有角色数据（每个角色3个API调用）
+            // 並行載入所有角色資料（每个角色3个API調用）
             rankings.forEach(async (char, idx) => {
                 try {
-                    // 获取ocid
+                    // 獲取ocid
                     const idResult = await apiRequest('/id', { character_name: char.character_name });
                     if (!idResult.ocid) {
                         document.getElementById(`rank-power-${idx}`).innerHTML = '<span style="color:#666;">-</span>';
                         return;
                     }
                     
-                    // 并行获取基本信息和属性
+                    // 並行獲取基本資訊和属性
                     const [basicResult, statResult] = await Promise.all([
                         apiRequest('/character/basic', { ocid: idResult.ocid }),
                         apiRequest('/character/stat', { ocid: idResult.ocid })
                     ]);
                     
-                    // 更新头像
+                    // 更新頭像
                     if (basicResult.character_image) {
                         const avatarEl = document.getElementById(`rank-avatar-${idx}`);
                         const placeholderEl = document.getElementById(`rank-avatar-placeholder-${idx}`);
@@ -2798,7 +2798,7 @@
                         }
                     }
                     
-                    // 更新战斗力
+                    // 更新戰鬥力
                     if (statResult.final_stat) {
                         const power = getStatValue(statResult.final_stat, '戰鬥力');
                         const powerValue = parseInt(power) || 0;
@@ -2820,7 +2820,7 @@
             });
         }
         
-        // 从排行榜点击跳转搜索
+        // 从排行榜点击跳转搜尋
         function searchFromRanking(characterName) {
             document.getElementById('characterName').value = characterName;
             switchMainTab('search');
