@@ -2597,13 +2597,17 @@
                     const flameVal = parseInt(flame[stat.key]) || 0;
                     const starVal = parseInt(star[stat.key]) || 0;
                     
+                    // 判斷是否為百分比屬性
+                    const isPercent = stat.key === 'all_stat' || stat.key === 'boss_damage' || stat.key === 'ignore_monster_armor' || stat.key === 'damage';
+                    const suffix = isPercent ? '%' : '';
+                    
                     if (totalVal > 0) {
-                        let detail = `${stat.name} : +${totalVal}`;
+                        let detail = `${stat.name} : +${totalVal}${suffix}`;
                         const parts = [];
-                        if (baseVal > 0) parts.push(`<span style="color:#fff">${baseVal}</span>`);
-                        if (scrollVal > 0) parts.push(`<span style="color:#cc88ff">+${scrollVal}</span>`);
-                        if (flameVal > 0) parts.push(`<span style="color:#66ff66">+${flameVal}</span>`);
-                        if (starVal > 0) parts.push(`<span style="color:#ffdd00">+${starVal}</span>`);
+                        if (baseVal > 0) parts.push(`<span style="color:#fff">${baseVal}${suffix}</span>`);
+                        if (scrollVal > 0) parts.push(`<span style="color:#cc88ff">+${scrollVal}${suffix}</span>`);
+                        if (flameVal > 0) parts.push(`<span style="color:#66ff66">+${flameVal}${suffix}</span>`);
+                        if (starVal > 0) parts.push(`<span style="color:#ffdd00">+${starVal}${suffix}</span>`);
                         
                         if (parts.length > 0) {
                             detail += ` <span style="color:#888;font-size:0.85em;">( ${parts.join(' ')} )</span>`;
@@ -2648,13 +2652,23 @@
                 const gradeStars = getGradeStars(item.potential_option_grade);
                 const addGradeStars = getGradeStars(item.additional_potential_option_grade);
                 
+                // 統一部位名稱顯示
+                function normalizePartName(part) {
+                    if (!part) return '';
+                    // 馬鞍、怪物裝備、馴服的怪物 統一顯示為「圖騰」
+                    if (part === '馬鞍' || part === '怪物裝備' || part === '馴服的怪物') {
+                        return '圖騰';
+                    }
+                    return part;
+                }
+                
                 return `
                 <div class="equip-item-new">
                     <div class="equip-header">
                         <img class="equip-icon-large" src="${item.item_icon || ''}" alt="">
                         <div class="equip-title">
                             <div class="equip-name-new">${item.item_name || '未知'}${item.scroll_upgrade ? ` (+${item.scroll_upgrade})` : ''}</div>
-                            <div class="equip-slot-new">${item.item_equipment_part || ''}</div>
+                            <div class="equip-slot-new">${normalizePartName(item.item_equipment_part)}</div>
                             ${starforceHtml}
                         </div>
                     </div>
