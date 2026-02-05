@@ -448,11 +448,17 @@
         }
         .equip-slot { font-size: 0.8em; color: #888; margin-bottom: 5px; }
         .equip-stats { font-size: 0.85em; color: #aaa; margin-bottom: 8px; }
-        .equip-pot { font-size: 0.8em; line-height: 1.4; }
-        .pot-legendary { color: #8aff8a; }
-        .pot-unique { color: #66ccff; }
-        .pot-epic { color: #ffcc00; }
-        .pot-rare { color: #cc88ff; }
+        .equip-pot-section { margin-top: 8px; }
+        .equip-pot-title { font-size: 0.8em; font-weight: bold; margin-bottom: 4px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+        .equip-pot-title.legendary { background: #2ecc71; color: #fff; }
+        .equip-pot-title.unique { background: #3498db; color: #fff; }
+        .equip-pot-title.epic { background: #f1c40f; color: #333; }
+        .equip-pot-title.rare { background: #9b59b6; color: #fff; }
+        .equip-pot-line { font-size: 0.8em; padding: 4px 8px; margin: 2px 0; border-radius: 4px; border-left: 3px solid #666; background: rgba(0,0,0,0.2); }
+        .equip-pot-line.legendary { border-left-color: #2ecc71; background: rgba(46, 204, 113, 0.15); color: #8aff8a; }
+        .equip-pot-line.unique { border-left-color: #3498db; background: rgba(52, 152, 219, 0.15); color: #66ccff; }
+        .equip-pot-line.epic { border-left-color: #f1c40f; background: rgba(241, 196, 15, 0.15); color: #ffcc00; }
+        .equip-pot-line.rare { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.15); color: #cc88ff; }
         .equip-item { min-height: 120px; }
         .star-force { color: #ffdd44; font-size: 0.85em; }
         .no-equip { text-align: center; padding: 40px; color: #666; }
@@ -2379,25 +2385,66 @@
                 return;
             }
             
+            // 潛能等級對應的CSS類
+            function getPotentialClass(grade) {
+                const gradeMap = {
+                    '傳說': 'legendary',
+                    'LEGENDARY': 'legendary',
+                    '特殊': 'unique',
+                    'UNIQUE': 'unique',
+                    '罕見': 'epic',
+                    'EPIC': 'epic',
+                    '稀有': 'rare',
+                    'RARE': 'rare'
+                };
+                return gradeMap[grade] || '';
+            }
+            
+            // 潛能等級名稱
+            function getPotentialName(grade) {
+                const nameMap = {
+                    '傳說': '傳說',
+                    'LEGENDARY': '傳說',
+                    '特殊': '特殊',
+                    'UNIQUE': '特殊',
+                    '罕見': '罕見',
+                    'EPIC': '罕見',
+                    '稀有': '稀有',
+                    'RARE': '稀有'
+                };
+                return nameMap[grade] || grade;
+            }
+            
+            // 構建單條潛能的HTML（每條根據自己的等級顯示顏色）
+            function buildPotentialLine(value, grade) {
+                if (!value) return '';
+                const potClass = getPotentialClass(grade);
+                return `<div class="equip-pot-line ${potClass}">${value}</div>`;
+            }
+            
             grid.innerHTML = equipment.map(item => {
                 // 構建潛能顯示
                 let potentialHtml = '';
                 if (item.potential_option_grade) {
-                    const potClass = getPotentialClass(item.potential_option_grade);
-                    potentialHtml += `<div class="equip-pot ${potClass}">【${getPotentialName(item.potential_option_grade)}潛能】</div>`;
-                    if (item.potential_option_1) potentialHtml += `<div class="equip-pot ${potClass}">　${item.potential_option_1}</div>`;
-                    if (item.potential_option_2) potentialHtml += `<div class="equip-pot ${potClass}">　${item.potential_option_2}</div>`;
-                    if (item.potential_option_3) potentialHtml += `<div class="equip-pot ${potClass}">　${item.potential_option_3}</div>`;
+                    const mainClass = getPotentialClass(item.potential_option_grade);
+                    potentialHtml += `<div class="equip-pot-section">`;
+                    potentialHtml += `<div class="equip-pot-title ${mainClass}">${getPotentialName(item.potential_option_grade)}潛能</div>`;
+                    potentialHtml += buildPotentialLine(item.potential_option_1, item.potential_option_1_grade || item.potential_option_grade);
+                    potentialHtml += buildPotentialLine(item.potential_option_2, item.potential_option_2_grade || item.potential_option_grade);
+                    potentialHtml += buildPotentialLine(item.potential_option_3, item.potential_option_3_grade || item.potential_option_grade);
+                    potentialHtml += `</div>`;
                 }
                 
                 // 構建附加潛能顯示
                 let addPotentialHtml = '';
                 if (item.additional_potential_option_grade) {
-                    const addPotClass = getPotentialClass(item.additional_potential_option_grade);
-                    addPotentialHtml += `<div class="equip-pot ${addPotClass}">【${getPotentialName(item.additional_potential_option_grade)}附加】</div>`;
-                    if (item.additional_potential_option_1) addPotentialHtml += `<div class="equip-pot ${addPotClass}">　${item.additional_potential_option_1}</div>`;
-                    if (item.additional_potential_option_2) addPotentialHtml += `<div class="equip-pot ${addPotClass}">　${item.additional_potential_option_2}</div>`;
-                    if (item.additional_potential_option_3) addPotentialHtml += `<div class="equip-pot ${addPotClass}">　${item.additional_potential_option_3}</div>`;
+                    const addMainClass = getPotentialClass(item.additional_potential_option_grade);
+                    addPotentialHtml += `<div class="equip-pot-section">`;
+                    addPotentialHtml += `<div class="equip-pot-title ${addMainClass}">${getPotentialName(item.additional_potential_option_grade)}附加</div>`;
+                    addPotentialHtml += buildPotentialLine(item.additional_potential_option_1, item.additional_potential_option_1_grade || item.additional_potential_option_grade);
+                    addPotentialHtml += buildPotentialLine(item.additional_potential_option_2, item.additional_potential_option_2_grade || item.additional_potential_option_grade);
+                    addPotentialHtml += buildPotentialLine(item.additional_potential_option_3, item.additional_potential_option_3_grade || item.additional_potential_option_grade);
+                    addPotentialHtml += `</div>`;
                 }
                 
                 return `
@@ -2422,36 +2469,6 @@
                     </div>
                 </div>
             `}).join('');
-            
-            // 潛能等級對應的CSS類
-            function getPotentialClass(grade) {
-                const gradeMap = {
-                    '傳說': 'pot-legendary',
-                    'LEGENDARY': 'pot-legendary',
-                    '特殊': 'pot-unique',
-                    'UNIQUE': 'pot-unique',
-                    '罕見': 'pot-epic',
-                    'EPIC': 'pot-epic',
-                    '稀有': 'pot-rare',
-                    'RARE': 'pot-rare'
-                };
-                return gradeMap[grade] || '';
-            }
-            
-            // 潛能等級名稱
-            function getPotentialName(grade) {
-                const nameMap = {
-                    '傳說': '傳說',
-                    'LEGENDARY': '傳說',
-                    '特殊': '特殊',
-                    'UNIQUE': '特殊',
-                    '罕見': '罕見',
-                    'EPIC': '罕見',
-                    '稀有': '稀有',
-                    'RARE': '稀有'
-                };
-                return nameMap[grade] || grade;
-            }
         }
 
         // 載入符文
