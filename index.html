@@ -2545,6 +2545,8 @@
                 
                 console.log('👗 Fashion data:', cashResult);
                 console.log('💇 Beauty data:', beautyResult);
+                console.log('💇 Beauty full:', JSON.stringify(beautyResult, null, 2));
+                console.log('👗 Fashion item example:', JSON.stringify(cashResult?.cash_item_equipment_base?.[0], null, 2));
                 
                 displayFashionByPreset(cachedFashionData, currentFashionPreset);
                 document.getElementById('fashionGrid').dataset.loaded = 'true';
